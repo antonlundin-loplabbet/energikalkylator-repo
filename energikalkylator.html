@@ -721,25 +721,30 @@ function suggestProducts(plan, products) {
     
     const items = [];
     if (drinkCarbs > 0 && drinkMix) {
-      const portions = Math.ceil(drinkCarbs / drinkMix.carbs);
+      // Säkra mot saknad/null carbs (kan hända om API-data är ofullständig).
+      // Faller då tillbaka till typiskt värde för drink_mix (40g/portion).
+      const carbsPerPortion = drinkMix.carbs && drinkMix.carbs > 0 ? drinkMix.carbs : 40;
+      const portions = Math.ceil(drinkCarbs / carbsPerPortion);
       items.push({
         product: drinkMix,
         amount: `${portions} portion${portions > 1 ? "er" : ""}`,
-        carbs: portions * drinkMix.carbs,
+        carbs: portions * carbsPerPortion,
         note: drinkMix.brand === "Maurten" 
           ? `Blanda i ${portions * 500} ml vatten, drick jämnt under loppet (~${Math.round(plan.fluidHr)} ml/h)`
           : `Blanda ${portions} skopor i ${portions * 250} ml vatten eller motsvarande`,
       });
     }
     if (gelCount > 0 && gel) {
+      const gelCarbs = gel.carbs && gel.carbs > 0 ? gel.carbs : 25;
       items.push({
         product: gel,
         amount: `${gelCount} st`,
-        carbs: gelCount * gel.carbs,
+        carbs: gelCount * gelCarbs,
         note: `Ta en gel var ${Math.round((time_h * 60) / Math.max(1, gelCount + gelCafCount))} min`,
       });
     }
     if (gelCafCount > 0 && gelCaf) {
+      const gelCafCarbs = gelCaf.carbs && gelCaf.carbs > 0 ? gelCaf.carbs : 25;
       // Koffein behöver 20-30 min för full effekt — anpassa rådet efter lopplängd.
       let cafNote;
       if (time_h < 1.5) {
@@ -752,7 +757,7 @@ function suggestProducts(plan, products) {
       items.push({
         product: gelCaf,
         amount: `${gelCafCount} st`,
-        carbs: gelCafCount * gelCaf.carbs,
+        carbs: gelCafCount * gelCafCarbs,
         note: cafNote,
       });
     }

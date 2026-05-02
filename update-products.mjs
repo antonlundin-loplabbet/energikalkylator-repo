@@ -32,22 +32,36 @@ const ENERGY_BRANDS = [
   "Energikakan"
 ];
 
+// Typiska värden per produkttyp. Används av kalkylatorn för att räkna ut
+// hur många gels/portioner som behövs när API:et inte ger exakta värden
+// per produkt. Värdena ska matcha det som finns i energikalkylator.html.
 const PRODUCT_TYPES = {
-  pre_drink: { matches: [/intend/i, /pre.?sport/i, /pre.?race/i, /pre.?workout/i] },
-  drink_mix: { matches: [/u sport/i, /drink.?mix/i, /isotonic/i, /isocarb/i, /sportdryck/i, /energy drink/i, /u loader/i] },
-  gel_caf: { matches: [
-    /(u gel|sport gel|liquid gel|^gel | gel ).{0,40}(caf|koffein)/i,
-    /(caf|koffein).{0,40}(u gel|sport gel|liquid gel|^gel | gel )/i,
-    /gel.{0,5}(100|160).{0,20}caf/i,
-  ]},
-  gel: { matches: [/u gel/i, /gel 100/i, /gel 160/i, /sport gel/i, /liquid gel/i, /^gel$/i, /isogel/i, /isotonic gel/i, / gel /i, / gel,/i, / gel$/i] },
-  bar: { matches: [/u bar/i, /salty bar/i, /solid c? ?1[0-9]+/i, /solid c? ?2[0-9]+/i, /sport bar/i, /protein.?bar/i, /recover.?bar/i, /recover.{0,15}bar/i, /energy bar/i, /energibar/i, /power crunchy/i, /^bar$/i, / bar$/i, / bar /i, / bar -/i] },
-  chew: { matches: [/chews/i, /energy chew/i, /jelly/i, /carbo tablets/i, /carbo tabletter/i, /sport carbo tabletter/i, /carbo chew/i, /godis/i] },
-  electrolyte: { matches: [/u salty/i, /salt.?tab/i, /salttab/i, /electrolyte/i, /elektrolyt/i, /hydrate/i, /salt cap/i] },
-  recovery: { matches: [/recovery drink/i, /recovery dryck/i, /återhämtningsdryck/i, /atergiv/i, /protein.?drink/i, /post.?workout/i, /recover.{0,15}(dryck|drink|pulver|powder|kg\b)/i, /\d+\s*kg.{0,20}återhämtning/i] },
-  beetroot: { matches: [/beet.?it/i, /rödbet/i, /beetroot/i, /nitrate/i] },
-  bicarb: { matches: [/bicarb/i, /bikarb/i, /sodium bicarbonate/i, /natrium.?bikarbonat/i] },
-  itc: { matches: [/itc/i, /nomio/i, /preformance/i, /performance shot/i] },
+  pre_drink:   { matches: [/intend/i, /pre.?sport/i, /pre.?race/i, /pre.?workout/i],
+                 typical_carbs: 30 },
+  drink_mix:   { matches: [/u sport/i, /drink.?mix/i, /isotonic/i, /isocarb/i, /sportdryck/i, /energy drink/i, /u loader/i],
+                 typical_carbs: 40 },
+  gel_caf:     { matches: [
+                   /(u gel|sport gel|liquid gel|^gel | gel ).{0,40}(caf|koffein)/i,
+                   /(caf|koffein).{0,40}(u gel|sport gel|liquid gel|^gel | gel )/i,
+                   /gel.{0,5}(100|160).{0,20}caf/i,
+                 ],
+                 typical_carbs: 25, typical_caf: 100 },
+  gel:         { matches: [/u gel/i, /gel 100/i, /gel 160/i, /sport gel/i, /liquid gel/i, /^gel$/i, /isogel/i, /isotonic gel/i, / gel /i, / gel,/i, / gel$/i],
+                 typical_carbs: 25 },
+  bar:         { matches: [/u bar/i, /salty bar/i, /solid c? ?1[0-9]+/i, /solid c? ?2[0-9]+/i, /sport bar/i, /protein.?bar/i, /recover.?bar/i, /recover.{0,15}bar/i, /energy bar/i, /energibar/i, /power crunchy/i, /^bar$/i, / bar$/i, / bar /i, / bar -/i],
+                 typical_carbs: 30 },
+  chew:        { matches: [/chews/i, /energy chew/i, /jelly/i, /carbo tablets/i, /carbo tabletter/i, /sport carbo tabletter/i, /carbo chew/i, /godis/i],
+                 typical_carbs: 10 },
+  electrolyte: { matches: [/u salty/i, /salt.?tab/i, /salttab/i, /electrolyte/i, /elektrolyt/i, /hydrate/i, /salt cap/i],
+                 typical_carbs: 0 },
+  recovery:    { matches: [/recovery drink/i, /recovery dryck/i, /återhämtningsdryck/i, /atergiv/i, /protein.?drink/i, /post.?workout/i, /recover.{0,15}(dryck|drink|pulver|powder|kg\b)/i, /\d+\s*kg.{0,20}återhämtning/i],
+                 typical_carbs: 30 },
+  beetroot:    { matches: [/beet.?it/i, /rödbet/i, /beetroot/i, /nitrate/i],
+                 typical_carbs: 0 },
+  bicarb:      { matches: [/bicarb/i, /bikarb/i, /sodium bicarbonate/i, /natrium.?bikarbonat/i],
+                 typical_carbs: 0 },
+  itc:         { matches: [/itc/i, /nomio/i, /preformance/i, /performance shot/i],
+                 typical_carbs: 0 },
 };
 
 const ACCESSORY_RX = /\b(soft.?flask|softflask|flaska|bottle|vattenflaska|löparbälte|midjebälte|springbelt|gelbälte|nutrition.?belt|belt|västs?|vest|h[åa]llare|holder|behållare|bälte|påse)\b/i;
