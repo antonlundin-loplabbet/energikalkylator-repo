@@ -139,8 +139,21 @@ function transformAPIResponse(data) {
     }
 
     const url = doc.url || doc.itemurl || (pNum ? `https://www.loplabbet.se/products/${pNum}/01` : "");
-    const img = doc.image || doc.imageurl || doc.image_url || doc.thumbnail ||
-                (pNum ? `https://cdn.intersport.se/productimages/690x600/${pNum}_10.jpg` : "");
+    
+    // CDN-bilder. Försök i ordning:
+    //  1. Direkta fältnamn från API:et (om de finns)
+    //  2. Bygg från långt produktnummer + variant. CDN-mönstret är
+    //     <12-siffrigt-id>_10.jpg där id = produktnummer + 5 siffror för
+    //     färg/variant + "000". Default-färgen är 01, så exempel:
+    //     produktnummer 1481899 → CDN-id 148189901000 → bild .../148189901000_10.jpg
+    let img = doc.image || doc.imageurl || doc.image_url || doc.thumbnail || doc.imgurl || "";
+    if (!img && pNum) {
+      const pStr = String(pNum);
+      // Om produktnumret redan är 12 siffror, använd som det är.
+      // Annars: lägg på "01000" för default-färg.
+      const cdnId = pStr.length >= 12 ? pStr : `${pStr}01000`;
+      img = `https://cdn.intersport.se/productimages/690x600/${cdnId}_10.jpg`;
+    }
 
     seen.add(pNum);
     result.push({
