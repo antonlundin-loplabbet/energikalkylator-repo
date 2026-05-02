@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-02 14:25:53Z",
+  "updated": "2026-05-02 14:43:01Z",
   "source": "https://services.intersport.se/api/noselake/searcher/website?q=&site=Loplabbet&hits=4000",
   "count": 109,
   "products": [
@@ -8,7 +8,7 @@
       "brand": "Enervit",
       "name": "Enervit Competition energibar",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -28,7 +28,7 @@
       "brand": "Enervit",
       "name": "Enervit E.SPORT CARBO BAR 2:1 BROWNIE",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -48,7 +48,7 @@
       "brand": "Enervit",
       "name": "Enervit E.SPORT CARBO BAR 2:1 NATURELL",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -68,7 +68,7 @@
       "brand": "Enervit",
       "name": "Enervit Power Crunchy energibar",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -88,7 +88,7 @@
       "brand": "Enervit",
       "name": "Enervit C2:1 CARBO JELLY 50G",
       "type": "chew",
-      "carbs": null,
+      "carbs": 10,
       "caf": null,
       "dose": "",
       "price": {
@@ -108,7 +108,7 @@
       "brand": "Enervit",
       "name": "Enervit CARBO CHEWS 2:1",
       "type": "chew",
-      "carbs": null,
+      "carbs": 10,
       "caf": null,
       "dose": "",
       "price": {
@@ -128,7 +128,7 @@
       "brand": "Enervit",
       "name": "Enervit Sport Carbo tabletter",
       "type": "chew",
-      "carbs": null,
+      "carbs": 10,
       "caf": null,
       "dose": "",
       "price": {
@@ -148,7 +148,7 @@
       "brand": "Enervit",
       "name": "Enervit E:SPORT ISOTONIC DRINK SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -168,7 +168,7 @@
       "brand": "Enervit",
       "name": "Enervit E.SPORT ISOCARB 2:1 BURK 650G",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -188,7 +188,7 @@
       "brand": "Enervit",
       "name": "Enervit ENERVIT SPORT Isotonic Drink new 420 g burk Sportdryck",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -208,7 +208,7 @@
       "brand": "Enervit",
       "name": "Enervit C2:1 CARBO GEL CITRON SODIUM ENERGIGEL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -228,7 +228,7 @@
       "brand": "Enervit",
       "name": "Enervit C2:1 CARBO GEL LIME",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -248,7 +248,7 @@
       "brand": "Enervit",
       "name": "Enervit C2:1 CARBO GEL MANGO 60ML ENERGIGEL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -268,7 +268,7 @@
       "brand": "Enervit",
       "name": "Enervit C2:1 CARBO GEL ORANGE 60ML",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -288,7 +288,7 @@
       "brand": "Enervit",
       "name": "Enervit E.SPORT LIQUID GEL APELSIN",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -308,7 +308,7 @@
       "brand": "Enervit",
       "name": "Enervit ENERVIT SPORT Pre Sport GEL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -328,7 +328,7 @@
       "brand": "Enervit",
       "name": "Enervit Liquid Gel Citron 60 ml energigel",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -348,7 +348,7 @@
       "brand": "Enervit",
       "name": "Enervit Liquid Gel Comp Citrus 60 ml energigel",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -368,7 +368,7 @@
       "brand": "Enervit",
       "name": "Enervit Sport Cola gel",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -388,7 +388,7 @@
       "brand": "Enervit",
       "name": "Enervit Sport Raspberry Gel",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -408,8 +408,8 @@
       "brand": "Enervit",
       "name": "Enervit C2:1 CARBO GEL COLA KOFFEIN ENERGIGEL",
       "type": "gel_caf",
-      "carbs": null,
-      "caf": null,
+      "carbs": 25,
+      "caf": 100,
       "dose": "",
       "price": {
         "percentvalue": "0",
@@ -428,8 +428,8 @@
       "brand": "Enervit",
       "name": "Enervit Enervit Gel med koffein",
       "type": "gel_caf",
-      "carbs": null,
-      "caf": null,
+      "carbs": 25,
+      "caf": 100,
       "dose": "",
       "price": {
         "percentvalue": "0",
@@ -448,7 +448,7 @@
       "brand": "Enervit",
       "name": "Enervit Presport Cola",
       "type": "pre_drink",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -468,7 +468,7 @@
       "brand": "Enervit",
       "name": "Enervit E.SPORT WP Recovery Drink",
       "type": "recovery",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -488,7 +488,7 @@
       "brand": "Impluse",
       "name": "Impluse Comfort Gel Hälkopp",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -508,7 +508,7 @@
       "brand": "Maurten",
       "name": "Maurten SOLID 160 SINGLE ENERGIBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -528,7 +528,7 @@
       "brand": "Maurten",
       "name": "Maurten SOLID C 160 SINGLE ENERGIBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -648,7 +648,7 @@
       "brand": "Maurten",
       "name": "Maurten BOX 14 st DRINKMIX 320 Sportdryck",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -668,7 +668,7 @@
       "brand": "Maurten",
       "name": "Maurten BOX 18 ST. DRINKMIX 160 Sportdryck",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -688,7 +688,7 @@
       "brand": "Maurten",
       "name": "Maurten DRINK MIX 320 CAF 100 BOX Sportdryck",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -708,7 +708,7 @@
       "brand": "Maurten",
       "name": "Maurten DRINK MIX 320 CAF 100 SINGLE SERV SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -728,7 +728,7 @@
       "brand": "Maurten",
       "name": "Maurten DRINKMIX 320 SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -748,7 +748,7 @@
       "brand": "Maurten",
       "name": "Maurten MAU DRINK MIX 160 Sportdryck",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -768,7 +768,7 @@
       "brand": "Maurten",
       "name": "Maurten GEL 100 BOX 12-pack ENERGIGEL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -788,7 +788,7 @@
       "brand": "Maurten",
       "name": "Maurten GEL 100 ENERGIGEL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -808,7 +808,7 @@
       "brand": "Maurten",
       "name": "Maurten GEL 160 BOX 10 ST ENERGIGEL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -828,7 +828,7 @@
       "brand": "Maurten",
       "name": "Maurten GEL 160 BOX 12 ST ENERGIGEL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -848,7 +848,7 @@
       "brand": "Maurten",
       "name": "Maurten GEL 160 SINGLE SERV ENERGIGEL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -868,8 +868,8 @@
       "brand": "Maurten",
       "name": "Maurten GEL 100 CAF 100 BOX 12 ST ENERGIGEL",
       "type": "gel_caf",
-      "carbs": null,
-      "caf": null,
+      "carbs": 25,
+      "caf": 100,
       "dose": "",
       "price": {
         "percentvalue": "0",
@@ -888,8 +888,8 @@
       "brand": "Maurten",
       "name": "Maurten GEL 100 CAF 100 ENERGIGEL",
       "type": "gel_caf",
-      "carbs": null,
-      "caf": null,
+      "carbs": 25,
+      "caf": 100,
       "dose": "",
       "price": {
         "percentvalue": "0",
@@ -908,7 +908,7 @@
       "brand": "Neversecond",
       "name": "Neversecond C30 6-PACK SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -928,7 +928,7 @@
       "brand": "Neversecond",
       "name": "Neversecond C30 SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -968,7 +968,7 @@
       "brand": "Silva",
       "name": "Silva FREE BAR MOUNT KIT",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -988,7 +988,7 @@
       "brand": "Spektrum",
       "name": "Spektrum KESU SPORTGLASÖGON",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1009,7 +1009,7 @@
       "brand": "Spektrum",
       "name": "Spektrum KESU SPORTGLASÖGON",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1030,7 +1030,7 @@
       "brand": "SpiBelt",
       "name": "SpiBelt PERFORMANCE PRO WITH GEL LOOPS",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1050,7 +1050,7 @@
       "brand": "Umara",
       "name": "Umara U BAR APELSIN CHOKLAD ENERGIBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1070,7 +1070,7 @@
       "brand": "Umara",
       "name": "Umara U BAR ÄPPLE/KANEL (GLUTENFRI) ENERGIBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1090,7 +1090,7 @@
       "brand": "Umara",
       "name": "Umara U BAR BLÅBÄR (GLUTENFRI) ENERGIBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1110,7 +1110,7 @@
       "brand": "Umara",
       "name": "Umara U Bar Körsbär (40g) Energibar",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1130,7 +1130,7 @@
       "brand": "Umara",
       "name": "Umara U BAR RABARBER ENERGIBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1150,7 +1150,7 @@
       "brand": "Umara",
       "name": "Umara U bar tranbär energibar",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1170,7 +1170,7 @@
       "brand": "Umara",
       "name": "Umara U CHEW COLA + KOFFEIN ENERGIBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1190,7 +1190,7 @@
       "brand": "Umara",
       "name": "Umara U CHEW KIWI ENERGIBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1210,7 +1210,7 @@
       "brand": "Umara",
       "name": "Umara U RECOVER PROTEINBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1230,7 +1230,7 @@
       "brand": "Umara",
       "name": "Umara U RECOVER PROTEINBAR",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1250,7 +1250,7 @@
       "brand": "Umara",
       "name": "Umara U Recover Proteinbar Rasp/Blueberry",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1270,7 +1270,7 @@
       "brand": "Umara",
       "name": "Umara U Salty Bar - Caramel/Peanut energibar",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1290,7 +1290,7 @@
       "brand": "Umara",
       "name": "Umara U-Bar Äpple/kanel Energibar",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1310,7 +1310,7 @@
       "brand": "Umara",
       "name": "Umara U-Bar Kokos Energibar",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -1370,7 +1370,7 @@
       "brand": "Umara",
       "name": "Umara  U Sport Fläder 1:0,8 500g",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1390,7 +1390,7 @@
       "brand": "Umara",
       "name": "Umara U LOADER BLODAPELSIN 1000MG SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1410,7 +1410,7 @@
       "brand": "Umara",
       "name": "Umara U Loader Lemon Lime 1000mg Sportdryck",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1430,7 +1430,7 @@
       "brand": "Umara",
       "name": "Umara U Sport Apelsin 1,8kg",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1450,7 +1450,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT APELSIN 2KG SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1470,7 +1470,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT APELSIN PORTIONSPÅSE SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1490,7 +1490,7 @@
       "brand": "Umara",
       "name": "Umara U Sport Citron 1:0,8 500g",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1510,7 +1510,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT CITRON 2KG SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1530,7 +1530,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT CITRON 5KG SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1550,7 +1550,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT CITRON PORTIONSPÅSE SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1570,7 +1570,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT FLÄDER 1,8 KG",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1590,7 +1590,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT FLÄDER 2KG SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1610,7 +1610,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT FLÄDER PORTIONSPÅSE SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1630,7 +1630,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT NEUTRAL 2 KG SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1650,7 +1650,7 @@
       "brand": "Umara",
       "name": "Umara U SPORT NEUTRAL PORTIONSPÅSE SPORTDRYCK",
       "type": "drink_mix",
-      "carbs": null,
+      "carbs": 40,
       "caf": null,
       "dose": "",
       "price": {
@@ -1750,7 +1750,7 @@
       "brand": "Umara",
       "name": "Umara U GEL (30G CARBS) CHOKLAD/KAFFE 50ml",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1770,7 +1770,7 @@
       "brand": "Umara",
       "name": "Umara U GEL (30G CARBS) FRESH MANGO",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1790,7 +1790,7 @@
       "brand": "Umara",
       "name": "Umara U GEL (30G CARBS) MENTOL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1810,7 +1810,7 @@
       "brand": "Umara",
       "name": "Umara U Gel (30g Carbs) Skruvkork Citron 50ml",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1830,7 +1830,7 @@
       "brand": "Umara",
       "name": "Umara U GEL (30g CARBS) VANILJSÅS 50ML",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1850,7 +1850,7 @@
       "brand": "Umara",
       "name": "Umara U Gel Cola Energigel",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1870,7 +1870,7 @@
       "brand": "Umara",
       "name": "Umara U Gel Hallon (33ml/42g) Energigel",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1890,7 +1890,7 @@
       "brand": "Umara",
       "name": "Umara U GEL SKRUVKORK HALLON 380 GRAM",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1910,7 +1910,7 @@
       "brand": "Umara",
       "name": "Umara UMA U GEL (30G CARBS)",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1930,7 +1930,7 @@
       "brand": "Umara",
       "name": "Umara UMA U GEL (30G CARBS) MANGO",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1950,7 +1950,7 @@
       "brand": "Umara",
       "name": "Umara UMA U GEL (30G CARBS) NEUTRAL",
       "type": "gel",
-      "carbs": null,
+      "carbs": 25,
       "caf": null,
       "dose": "",
       "price": {
@@ -1970,8 +1970,8 @@
       "brand": "Umara",
       "name": "Umara U GEL (30G CARBS) SKOGSBÄR + KOFFEIN",
       "type": "gel_caf",
-      "carbs": null,
-      "caf": null,
+      "carbs": 25,
+      "caf": 100,
       "dose": "",
       "price": {
         "percentvalue": "0",
@@ -1990,8 +1990,8 @@
       "brand": "Umara",
       "name": "Umara U Gel (30g Carbs) Skruvkork Grape+Koffein 50m",
       "type": "gel_caf",
-      "carbs": null,
-      "caf": null,
+      "carbs": 25,
+      "caf": 100,
       "dose": "",
       "price": {
         "percentvalue": "0",
@@ -2010,8 +2010,8 @@
       "brand": "Umara",
       "name": "Umara U GEL (30G CARBS) SVARETVINBÄR + KOFFEIN",
       "type": "gel_caf",
-      "carbs": null,
-      "caf": null,
+      "carbs": 25,
+      "caf": 100,
       "dose": "",
       "price": {
         "percentvalue": "0",
@@ -2030,7 +2030,7 @@
       "brand": "Umara",
       "name": "Umara U INTEND 250 GRAM PREWORKOUT",
       "type": "pre_drink",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -2050,7 +2050,7 @@
       "brand": "Umara",
       "name": "Umara U Intend Citron Shot 60ml Energishot",
       "type": "pre_drink",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -2070,7 +2070,7 @@
       "brand": "Umara",
       "name": "Umara U Intend Cola 250g",
       "type": "pre_drink",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -2090,7 +2090,7 @@
       "brand": "Umara",
       "name": "Umara U Intend Grape 250g",
       "type": "pre_drink",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -2110,7 +2110,7 @@
       "brand": "Umara",
       "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
       "type": "recovery",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -2130,7 +2130,7 @@
       "brand": "Umara",
       "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
       "type": "recovery",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
@@ -2150,7 +2150,7 @@
       "brand": "Vitargo",
       "name": "Vitargo Vitargo 323 energy bar, 80g",
       "type": "bar",
-      "carbs": null,
+      "carbs": 30,
       "caf": null,
       "dose": "",
       "price": {
