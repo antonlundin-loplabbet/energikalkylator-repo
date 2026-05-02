@@ -226,17 +226,64 @@ function applyUrlOverride(product) {
 // Mjukflaska — används som tilläggs-rekommendation i "många gels"-tipsblocket.
 // Ligger utanför FALLBACK_PRODUCTS / API-poolen så den aldrig av misstag
 // klassificeras som energiprodukt eller plockas av pick().
-const SOFT_FLASK_PRODUCT = {
-  id: "umara-soft-flask-150",
-  brand: "Umara",
-  name: "Awesome Soft Flask 150ml",
-  type: null,
-  dose: "Tilläggsprodukt",
-  price: 89,
-  url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-awesome-soft-flask-150-ml-vattenflaska/no",
-  img: "https://cdn.intersport.se/productimages/690x600/161856101000_10.jpg",
-  inStock: true,
-};
+// Mjukflaskor — används som tilläggs-rekommendationer i "många gels"-tipsblocket.
+// Ligger utanför FALLBACK_PRODUCTS / API-poolen så de aldrig av misstag
+// klassificeras som energiprodukter eller plockas av pick().
+// Kalkylatorn väljer slumpmässigt en av flaskorna vid varje sidladdning så
+// användaren får variation utan att vi belastar UI:t med många val.
+const SOFT_FLASKS = [
+  {
+    id: "umara-soft-flask-150",
+    brand: "Umara",
+    name: "Awesome Soft Flask 150ml",
+    note: "Rymmer ca 5 gels. Rensbar och återanvändbar.",
+    price: 89,
+    url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-awesome-soft-flask-150-ml-vattenflaska/no",
+    img: "https://cdn.intersport.se/productimages/690x600/161856101000_10.jpg",
+  },
+  {
+    id: "soft-flask-163853501",
+    brand: "Salomon",
+    name: "Mjukflaska",
+    note: "Mjuk hopvikbar flaska för bröstrem eller väst.",
+    url: "https://www.loplabbet.se/products/163853501/01",
+    img: "https://cdn.intersport.se/productimages/690x600/163853501000_10.jpg",
+  },
+  {
+    id: "soft-flask-157893101",
+    brand: "Salomon",
+    name: "Mjukflaska",
+    note: "Mjuk hopvikbar flaska för bröstrem eller väst.",
+    url: "https://www.loplabbet.se/products/157893101/01",
+    img: "https://cdn.intersport.se/productimages/690x600/157893101000_10.jpg",
+  },
+];
+
+// Vätskesystem för långa lopp — bärbara flaskor, västar och ryggsäckar
+// som rekommenderas på 2,5h+ lopp där man behöver bära mer än vad en handflaska
+// räcker till. Visas som ett separat block i "Under loppet".
+const HYDRATION_SYSTEMS = [
+  {
+    id: "hydration-153365601",
+    brand: "Salomon",
+    name: "Vätskesystem",
+    note: "Komplett bärsystem för långa lopp där du behöver mer än en handflaska.",
+    url: "https://www.loplabbet.se/products/153365601/01",
+    img: "https://cdn.intersport.se/productimages/690x600/153365601000_10.jpg",
+  },
+  {
+    id: "hydration-158863401",
+    brand: "Salomon",
+    name: "Löparväst",
+    note: "Lätt och välsittande för längre distanser. Plats för flaskor, gels och regnplagg.",
+    url: "https://www.loplabbet.se/products/158863401/01",
+    img: "https://cdn.intersport.se/productimages/690x600/158863401000_10.jpg",
+  },
+];
+
+// Behåll SOFT_FLASK_PRODUCT som alias för bakåtkompatibilitet (om det
+// skulle finnas referenser kvar någonstans). Pekar på första flaskan i listan.
+const SOFT_FLASK_PRODUCT = SOFT_FLASKS[0];
 
 const FALLBACK_PRODUCTS = [
   // ── UMARA ──
@@ -761,15 +808,34 @@ function suggestProducts(plan, products) {
     // Gel-flaska om det blir många gels att hantera
     const totalGels = gelCount + gelCafCount;
     if (totalGels >= 4) {
+      // Slumpa en flaska från SOFT_FLASKS så användaren får variation mellan
+      // sessioner. Alla flaskor i listan är godkända alternativ för samma syfte.
+      const flask = SOFT_FLASKS[Math.floor(Math.random() * SOFT_FLASKS.length)];
       duringPlan.push({
         heading: "Tips: häll gels i en mjukflaska",
         detail: `Med ${totalGels} gels att hantera under loppet blir det smidigare att tömma dem i en mjukflaska än att fippla med varsin förpackning. Du får då också möjlighet att ta små klunkar oftare istället för att tömma en hel gel åt gången – mer jämn energitillförsel och snällare mot magen. Späd gärna ut med lite vatten i flaskan om gelen är trögflytande.`,
         products: [{
-          product: SOFT_FLASK_PRODUCT,
+          product: flask,
           amount: "1 st",
           carbs: 0,
-          note: "Rymmer ca 5 gels. Rensbar och återanvändbar.",
+          note: flask.note,
         }],
+      });
+    }
+    
+    // Vätskesystem för långa lopp (2,5h+) — där en handflaska räcker inte
+    // och man behöver en väst eller bärsystem för att kunna ta med både
+    // vätska, gels och eventuellt regnplagg.
+    if (time_h >= 2.5) {
+      duringPlan.push({
+        heading: "Vätskesystem för långa lopp",
+        detail: `På lopp över 2,5 timmar räcker sällan en handflaska, särskilt om det är varmt eller om vätskestationerna är glest placerade. En löparväst eller ett bärsystem ger plats för flera flaskor, alla dina gels samlat samt utrymme för regnplagg och annat smått. Här är några alternativ vi har i sortimentet, kom gärna förbi butiken så hjälper vi dig hitta rätt passform.`,
+        products: HYDRATION_SYSTEMS.map(p => ({
+          product: p,
+          amount: "",
+          carbs: 0,
+          note: p.note,
+        })),
       });
     }
     
