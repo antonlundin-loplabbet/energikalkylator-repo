@@ -95,7 +95,14 @@ function isEnergyDoc(doc) {
   const brandRaw = (doc.brand || doc.brand_name || doc.brandname || doc.manufacturer || doc.itembrand || "").toLowerCase().trim();
   if (brandRaw && ENERGY_BRANDS.some(b => {
     const bn = b.toLowerCase();
-    return brandRaw === bn || brandRaw.includes(bn) || bn.includes(brandRaw);
+    // Exakt match eller "vårt brand-namn ÄR HELA brand-namnet i feeden"
+    // (för att fånga "Maurten Group AB" → "Maurten").
+    // Tidigare användes också brandRaw.includes(bn) men det gav falskt
+    // positivt: "on".includes("on") finns i "precisi-on", "tailwind nutriti-on" osv.
+    if (brandRaw === bn) return true;
+    // Substring åt bara ett håll: vårt korta brandnamn finns i feedens
+    // (potentiellt längre) brandnamn med ordgräns runt.
+    return new RegExp(`\\b${bn.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(brandRaw);
   })) return true;
 
   const name = (doc.commercialname || doc.itemname || doc.name || "").toLowerCase();
@@ -140,29 +147,31 @@ function transformAPIResponse(data) {
 
     const url = doc.url || doc.itemurl || (pNum ? `https://www.loplabbet.se/products/${pNum}/01` : "");
     
-    // CDN-bilder. Försök i ordning:
-    //  1. Direkta fältnamn från API:et — letar brett eftersom Intersport
-    //     använder olika fältnamn för olika produkttyper
-    //  2. Bygg från långt produktnummer + variant. CDN-mönstret är
-    //     <12-siffrigt-id>_<NN>.jpg. Default är "01000_10" men vissa
-    //     produkter använder "_00" eller andra suffix — då hjälper det
-    //     bara att läsa fältet direkt från API:et.
-    let img = doc.image || doc.imageurl || doc.image_url || doc.thumbnail || 
-              doc.imgurl || doc.imageurls || doc.images || doc.mediaurl || 
-              doc.mediaurls || doc.picture || doc.itemimage || doc.itemimageurl || "";
-    // Om värdet är en array (t.ex. ["url1", "url2"]) — ta första
-    if (Array.isArray(img)) img = img[0] || "";
-    // Om värdet är ett objekt med {url: "..."} — extrahera
-    if (typeof img === "object" && img !== null) img = img.url || img.src || "";
-    // Relativa URL:er → absolut
-    if (typeof img === "string" && img.startsWith("/")) {
-      img = `https://cdn.intersport.se${img}`;
+    // CDN-bilder. Intersport-API:et returnerar `itemimages` som en array
+    // av filnamn (t.ex. ["116529701000_00.jpg", "116529701000_10.jpg"]) —
+    // suffix _00, _10, _101 m.m. varierar mellan produkter, så det är
+    // viktigt att vi läser FAKTISKT filnamn istället för att gissa.
+    let imgFile = "";
+    if (Array.isArray(doc.itemimages) && doc.itemimages.length) {
+      imgFile = doc.itemimages[0];  // första bilden = primär produktbild
+    } else if (Array.isArray(doc.images) && doc.images.length) {
+      // Fallback: 'images'-arrayen har {image: "filnamn", url: "/productimages/"}
+      const first = doc.images[0];
+      imgFile = (first && (first.image || first.name)) || "";
+      // Säkerställ .jpg-suffix
+      if (imgFile && !/\.\w+$/.test(imgFile)) imgFile += ".jpg";
     }
-    // Sista fallback: bygg från produktnummer (kan vara fel suffix för vissa)
-    if (!img && pNum) {
+    
+    let img;
+    if (imgFile) {
+      img = `https://cdn.intersport.se/productimages/690x600/${imgFile}`;
+    } else if (pNum) {
+      // Sista nödfallback om bildfält saknas helt - gissa default _10
       const pStr = String(pNum);
       const cdnId = pStr.length >= 12 ? pStr : `${pStr}01000`;
       img = `https://cdn.intersport.se/productimages/690x600/${cdnId}_10.jpg`;
+    } else {
+      img = "";
     }
 
     seen.add(pNum);
@@ -194,23 +203,6 @@ async function main() {
     process.exit(1);
   }
   const data = await res.json();
-  
-  // DEBUG: skriv ut bildrelaterade fält från första energi-produkten
-  // så vi ser vilket fält som faktiskt har bild-URL:n.
-  const docs = data?.data?.products?.documents || data?.documents || data?.products || [];
-  const sampleEnergyDoc = docs.find(d => isEnergyDoc(d));
-  if (sampleEnergyDoc) {
-    console.log("\n=== DEBUG: alla fält i första energiprodukten ===");
-    console.log(JSON.stringify(sampleEnergyDoc, null, 2).slice(0, 3000));
-    console.log("\n=== Fält som innehåller 'image', 'img', 'thumb', 'pic' ===");
-    for (const [key, val] of Object.entries(sampleEnergyDoc)) {
-      if (/image|img|thumb|pic|media|url/i.test(key)) {
-        console.log(`  ${key}: ${JSON.stringify(val).slice(0, 200)}`);
-      }
-    }
-    console.log("===\n");
-  }
-  
   const { products, dropped } = transformAPIResponse(data);
 
   if (products.length < 10) {
