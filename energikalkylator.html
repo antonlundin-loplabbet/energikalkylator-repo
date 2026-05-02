@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Löplabbet Energikalkylator</title>
+  <link rel="icon" href="https://www.loplabbet.se/globalassets/loplabbet/loggos/loplabbet_symbol_ben_new.svg">
+  <style>
+    html,body{margin:0;padding:0;background:#ffffff;}
+    body{min-height:100vh;}
+    #root{min-height:100vh;}
+  </style>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react">
+const { useState, useMemo, useEffect } = React;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LÖPLABBET ENERGIKALKYLATOR v1
+// Personlig nutrition för lopp från 5 km till ultra
+// Hämtar produkter live via Intersport noselake API med fallback
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── DATAKÄLLA ──────────────────────────────────────────────────────────────
+// Produkterna laddas från en statisk produkter.json som uppdateras av en
+// GitHub Action varje måndagsmorgon (.github/workflows/update-products.yml).
+// Det här ger snabb laddning, full kontroll över vad som rekommenderas och
+// versionerade snapshots i Git-historiken så vi ser vad som ändrats vecka
+// för vecka.
+//
+// Filen ligger i samma mapp som den här HTML-filen, så relativ URL räcker
+// och funkar både lokalt, på GitHub Pages och i iframe-embed.
+//
+// Om JSON-filen inte är åtkomlig (t.ex. innan första körningen av Actions)
+// faller vi tillbaka på den manuellt curerade FALLBACK_PRODUCTS-listan
+// längre ner i den här filen.
+const PRODUCTS_JSON_URL = "produkter.json";
+const LL = "https://www.loplabbet.se";
+const CDN = "https://cdn.intersport.se/productimages/690x600";
+
+// Kända energi/sportnutrition-märken. Används som FALLBACK-signal om
+// kategorierna saknas — primärfilter är dock kategorin "energi"/"sportdryck".
+// Stavning-varianter (PrecisionFuel/Precision Fuel etc) tas med för säkerhets skull.
+const ENERGY_BRANDS = [
+  "Umara", "Maurten", "Enervit", "Nomio",
+  "High5", "High 5", "SiS", "Science in Sport", "32Gi",
+  "Precision Fuel", "PrecisionFuel", "Precision Hydration", "Precision Fuel & Hydration", "PF&H",
+  "Tailwind", "Tailwind Nutrition", "Vitargo", "Mountain Fuel",
+  "Naak", "Näak", "GU", "GU Energy", "GU Energy Labs",
+  "226ERS", "Veloforte", "Spring Energy", "VOOM", "VOOM Pocket Rocket",
+  "Hammer", "Hammer Nutrition", "Pure Sports Nutrition", "Cliff", "Clif",
+  "Energikakan"
+];
+
+// När användaren inte valt ett specifikt märke (eller det valda märket inte har
+// produkten i den typ som behövs) så vill vi inte att slumpmässiga småbrands
+// ska poppa upp först. Den här ordningen styr fallback-prio i pick().
+const BRAND_PRIORITY = ["Umara", "Maurten", "Enervit", "Nomio"];
+
+// Per-typ brand-preferens när användaren valt "Spelar ingen roll".
+// Tanken: ge en naturlig blandning av varumärken där rätt produkt rekommenderas
+// för rätt sak, istället för att hela planen kör ett enda märke. Första
+// posten är förstahandsvalet, resten är fallback om det inte finns i lager.
+// Per-typ namnpreferens: filtrerar bort produkter som visserligen matchar
+// typens regex men som vi ändå inte vill rekommendera på den rollen.
+//  pre_drink: undvik GEL-varianten — Cola är den med koffein och rätt formulering
+//             som pre-race-laddare. GEL är en separat produkt utan koffein.
+//  drink_mix: undvik koffein-versioner och loader-produkter som standardval.
+//             Loader (U Loader) är en carb-loading-produkt för dagarna FÖRE
+//             loppet. Under loppet vill vi ha vanlig sportdryck typ U Sport
+//             eller Maurten Drink Mix. Koffein-versioner undviks så användaren
+//             kan styra koffeindosen via koffein-gels istället.
+const AVOID_PATTERNS = {
+  pre_drink: /\bgel\b/i,
+  drink_mix: /\b(caf|koffein|loader)\b/i,
+};
+
+const PREFERRED_BY_TYPE = {
+  electrolyte: ["Umara"],                      // U Salty är vår standard på salttabletter
+  recovery:    ["Umara", "Enervit"],           // U Recover är komplett (kolhydrater + protein)
+  drink_mix:   ["Maurten", "Umara", "Enervit"],// Drink Mix 320 är industristandard
+  gel:         ["Maurten", "Umara", "Enervit"],
+  gel_caf:     ["Maurten", "Umara", "Enervit"],
+  bar:         ["Umara", "Maurten", "Enervit"],// U Bar/U Salty Bar är prisvärda och välsmakande
+  chew:        ["Enervit", "Umara"],           // Carbo Chews är klassiker
+  pre_drink:   ["Enervit", "Umara"],
+  bicarb:      ["Maurten", "Umara"],           // Bicarb System är förstavalet
+  beetroot:    ["Umara"],                      // U Nitrate
+  itc:         ["Nomio"],
+};
+
+// ─── PRODUKTKATEGORIER ──────────────────────────────────────────────────────
+// Klassificerar produkter via namnmatchning så vi kan visa rätt sak på rätt
+// plats (innan / under / efter / boost). Stödjer alla tre huvudmärken.
+const PRODUCT_TYPES = {
+  pre_drink: {
+    label: "Pre-workout dryck",
+    matches: [/intend/i, /pre.?sport/i, /pre.?race/i, /pre.?workout/i],
+    typical_carbs: 30,
+  },
+  drink_mix: {
+    label: "Sportdryckspulver",
+    // Inkluderar både "drink mix" (med space) och "drinkmix" (Maurtens egen stavning),
+    // samt loader-produkter som är carb-loading-pulver.
+    matches: [/u sport/i, /drink.?mix/i, /isotonic/i, /isocarb/i, /sportdryck/i, /energy drink/i, /u loader/i],
+    typical_carbs: 40,
+  },
+  gel_caf: {
+    label: "Energigel med koffein",
+    // gel_caf måste matcha både gel-i-namnet + koffein-indikator. Vi matchar
+    // INTE bara "caf 100" i isolation eftersom Maurten Drink Mix 320 CAF 100
+    // också använder den suffixen — kollar därför att det finns en gel-indikator.
+    matches: [
+      /(u gel|sport gel|liquid gel|^gel | gel ).{0,40}(caf|koffein)/i,
+      /(caf|koffein).{0,40}(u gel|sport gel|liquid gel|^gel | gel )/i,
+      /gel.{0,5}(100|160).{0,20}caf/i,  // "Gel 100 CAF 100"
+    ],
+    typical_carbs: 25,
+    typical_caf: 100,
+  },
+  gel: {
+    label: "Energigel",
+    matches: [/u gel/i, /gel 100/i, /gel 160/i, /sport gel/i, /liquid gel/i, /^gel$/i, /isogel/i, /isotonic gel/i, / gel /i, / gel,/i, / gel$/i],
+    typical_carbs: 25,
+  },
+  bar: {
+    label: "Energibar",
+    matches: [/u bar/i, /salty bar/i, /solid c? ?1[0-9]+/i, /solid c? ?2[0-9]+/i, /sport bar/i, /protein.?bar/i, /recover.?bar/i, /recover.{0,15}bar/i, /energy bar/i, /energibar/i, /power crunchy/i, /^bar$/i, / bar$/i, / bar /i, / bar -/i],
+    typical_carbs: 30,
+  },
+  chew: {
+    label: "Energi­chews",
+    matches: [/chews/i, /energy chew/i, /jelly/i, /carbo tablets/i, /carbo tabletter/i, /sport carbo tabletter/i, /carbo chew/i, /godis/i],
+    typical_carbs: 10,
+  },
+  electrolyte: {
+    label: "Salttabletter / elektrolyter",
+    matches: [/u salty/i, /u hydrate/i, /salt.?tab/i, /electrolyte/i, /elektrolyt/i, /hydration tab/i],
+  },
+  recovery: {
+    label: "Återhämtningsdryck",
+    // Måste vara en DRYCK eller PULVER, inte en bar. "U Recover Proteinbar"
+    // matchar substring "recover" men ska klassificeras som bar (det är mat).
+    matches: [/recovery drink/i, /recovery dryck/i, /återhämtningsdryck/i, /atergiv/i, /protein.?drink/i, /post.?workout/i, /recover.{0,15}(dryck|drink|pulver|powder|kg\b)/i, /\d+\s*kg.{0,20}återhämtning/i],
+  },
+  beetroot: {
+    label: "Rödbetsshot (nitrat)",
+    matches: [/beet.?it/i, /rödbet/i, /beetroot/i, /nitrate/i],
+  },
+  itc: {
+    label: "Prestationsshot (ITC)",
+    matches: [/nomio/i, /isothiocyan/i, /broccoligrodd/i],
+  },
+  bicarb: {
+    label: "Bikarbonat (laktat-buffert)",
+    matches: [/bicarb/i, /bikarbonat/i, /sodium bicarbonate/i],
+  },
+};
+
+// Tillbehör som inte är energiprodukter — flaskor, väskor, bälten etc.
+// "Soft Flask Gel 150ml" är t.ex. en gelflaska, inte en gel.
+// (OBS: "pack" och "sleeve" hanteras av MULTIPACK_RX nedan, inte här —
+//  ett "20-pack" gels är fortfarande gels, bara med lägre rekommendationsprio.)
+const ACCESSORY_RX = /\b(soft.?flask|softflask|flaska|bottle|vattenflaska|löparbälte|midjebälte|springbelt|gelbälte|nutrition.?belt|belt|västs?|vest|h[åa]llare|holder|behållare|bälte|påse)\b/i;
+
+// Multi-pack-indikatorer — föredrar singelförpackningar i rekommendationer.
+// Box/kartonger/flerpack är prisvärda men "tråkiga" som inspirerande
+// produktrekommendation till någon som planerar ett enskilt lopp.
+const MULTIPACK_RX = /\b(box|kartong|carton|flerpack|multipack|\d+\s*[-]?\s*pack|\d+\s*pack|pack\s*\d+|10[\s-]?st|12[\s-]?st|16[\s-]?st|20[\s-]?st|24[\s-]?st|10er|12er|20er|sleeve)\b/i;
+
+function isAccessory(name) {
+  return ACCESSORY_RX.test(name || "");
+}
+
+function isMultiPack(name) {
+  return MULTIPACK_RX.test(name || "");
+}
+
+function classifyProduct(name) {
+  const n = name || "";
+  // Tillbehör först — annars matchar t.ex. "Soft Flask Gel" som energigel
+  if (isAccessory(n)) return null;
+  // Specialfall: "U Salty Bar" är en bar (mat), inte en electrolyte (salt-tablett).
+  // Måste fångas innan electrolyte-regex annars blir det fel.
+  if (/salty bar/i.test(n)) return "bar";
+  // Specialfall: "Pre Sport GEL" är en energigel som råkar bära Pre Sport-namnet.
+  // Det är inte samma produkt som "Presport Cola" (pulvermix för carb-loading).
+  // Båda matchar pre_drink-regex annars, så den här specialklausulen sorterar
+  // gel-varianten till rätt typ — användaren får då Presport Cola på pre-rollen.
+  if (/pre.?sport.{0,5}gel/i.test(n)) return "gel";
+  // Ordningen spelar roll, testa specifika först
+  const order = ["bicarb", "itc", "beetroot", "electrolyte", "recovery", "pre_drink", "gel_caf", "drink_mix", "bar", "chew", "gel"];
+  for (const t of order) {
+    if (PRODUCT_TYPES[t].matches.some(rx => rx.test(n))) return t;
+  }
+  return null;
+}
+
+// ─── PRODUKTKATALOG (FALLBACK) ──────────────────────────────────────────────
+//
+// Live-API:et är primär källa. Den här listan används om API:et inte svarar
+// eller ger för få träffar. Innehåller representativa produkter från Umara,
+// Maurten och Enervit + Nomio prestationsshot.
+//
+// URL_OVERRIDES nedan tvingar specifika produkter till vissa URL:er — t.ex.
+// Bicarb som ska peka på landningssidan med dosräknaren snarare än
+// produktsidan. Fungerar både för fallback och live-data.
+
+const URL_OVERRIDES = {
+  // Bicarb går alltid till landningssidan med dosräknaren
+  bicarb: { Maurten: "https://www.loplabbet.se/landningssida/maurten-bicarb-system" },
+};
+
+function applyUrlOverride(product) {
+  const byBrand = URL_OVERRIDES[product.type];
+  if (byBrand && byBrand[product.brand]) {
+    return { ...product, url: byBrand[product.brand] };
+  }
+  return product;
+}
+
+// Mjukflaska — används som tilläggs-rekommendation i "många gels"-tipsblocket.
+// Ligger utanför FALLBACK_PRODUCTS / API-poolen så den aldrig av misstag
+// klassificeras som energiprodukt eller plockas av pick().
+const SOFT_FLASK_PRODUCT = {
+  id: "umara-soft-flask-150",
+  brand: "Umara",
+  name: "Awesome Soft Flask 150ml",
+  type: null,
+  dose: "Tilläggsprodukt",
+  price: 89,
+  url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-awesome-soft-flask-150-ml-vattenflaska/no",
+  img: "https://cdn.intersport.se/productimages/690x600/161856101000_10.jpg",
+  inStock: true,
+};
+
+const FALLBACK_PRODUCTS = [
+  // ── UMARA ──
+  { id: "u-sport-pulver", brand: "Umara", name: "U Sport Sportdryck 2kg", type: "drink_mix", carbs: 30, dose: "1 skopa (33g) per 2,5 dl vatten", price: 499, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-sport-neutral-2-kg-sportdryck/neutral", img: "https://cdn.intersport.se/productimages/690x600/159716401000_10.jpg" },
+  { id: "u-gel", brand: "Umara", name: "U Gel 50ml (30g kolhydrater)", type: "gel", carbs: 30, dose: "1 gel = 30g kolhydrater", price: 29, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-uma-u-gel-30g-carbs-mango/mango", img: "https://cdn.intersport.se/productimages/690x600/157598401000_10.jpg" },
+  { id: "u-gel-caf", brand: "Umara", name: "U Gel Koffein (Cola)", type: "gel_caf", carbs: 30, caf: 30, dose: "1 gel = 30g kolhydrater + 30mg koffein", price: 35, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-gel-cola-energigel/cola", img: "https://cdn.intersport.se/productimages/690x600/153785501000_10.jpg" },
+  { id: "u-bar", brand: "Umara", name: "U Bar Körsbär 40g", type: "bar", carbs: 25, dose: "1 bar = 25g kolhydrater", price: 25, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-bar-korsbar-40g-energibar/korsbar", img: "https://cdn.intersport.se/productimages/690x600/154675101000_10.jpg" },
+  { id: "u-salty-bar", brand: "Umara", name: "U Salty Bar Caramel/Peanut 70g", type: "bar", carbs: 35, dose: "1 bar = 35g kolhydrater + extra salt", price: 39, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-salty-bar-caramel-peanut-energibar/no", img: "https://cdn.intersport.se/productimages/690x600/146605801000_10.jpg" },
+  { id: "u-intend", brand: "Umara", name: "U Intend Pre-Workout 250g", type: "pre_drink", carbs: 30, caf: 100, dose: "Drick 45-60 min före start", price: 289, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-intend-250-gram-preworkout/apelsin", img: null },
+  { id: "u-recover", brand: "Umara", name: "U Recover Återhämtningsdryck", type: "recovery", dose: "Drick direkt inom 30 min efter pass. 33g kolhydrater + 15g protein", price: 369, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-recover-1-kg-aterhamtningsdryck/choklad", img: "https://cdn.intersport.se/productimages/690x600/151144101000_10.jpg" },
+  { id: "u-salty", brand: "Umara", name: "U Salty Salttabletter", type: "electrolyte", dose: "1 tab per 2,5 dl svett", price: 99, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-salty-salttabletter/no", img: "https://cdn.intersport.se/productimages/690x600/148460501000_10.jpg" },
+  { id: "u-hydrate", brand: "Umara", name: "U Hydrate Brustabletter 10st", type: "electrolyte", dose: "Halv eller hel tablett i vätskan", price: 37, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-hydrate-citron-10st-ror/citron", img: "https://cdn.intersport.se/productimages/690x600/146811401000_10.jpg" },
+  { id: "u-nitrate", brand: "Umara", name: "U Nitrate 60ml Rödbetsshot", type: "beetroot", dose: "1-2 shot 2,5h före aktivitet (500mg nitrat per shot)", price: 24, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/umara-u-nitrate-60ml-rodbetsshot/svart-gra", img: "https://cdn.intersport.se/productimages/690x600/148189901000_10.jpg" },
+  // ── MAURTEN ──
+  { id: "maurten-mix-160", brand: "Maurten", name: "Maurten Drink Mix 160", type: "drink_mix", carbs: 40, dose: "Blanda i 500 ml vatten", price: 24, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/maurten-box-18-st-drinkmix-160-sportdryck/svart", img: "https://cdn.intersport.se/productimages/690x600/148460801000_10.jpg" },
+  { id: "maurten-mix-320", brand: "Maurten", name: "Maurten Drink Mix 320", type: "drink_mix", carbs: 80, dose: "Blanda i 500 ml vatten", price: 37, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/maurten-drinkmix-320-sportdryck/black", img: "https://cdn.intersport.se/productimages/690x600/143307101000_10.jpg" },
+  { id: "maurten-mix-320-caf", brand: "Maurten", name: "Maurten Drink Mix 320 CAF 100", type: "drink_mix", carbs: 80, caf: 100, dose: "Blanda i 500 ml vatten", price: 42, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/maurten-drink-mix-320-caf-100-single-serv-sportdryck/no", img: "https://cdn.intersport.se/productimages/690x600/149717601000_10.jpg" },
+  { id: "maurten-gel-100", brand: "Maurten", name: "Maurten Gel 100", type: "gel", carbs: 25, dose: "1 gel = 25g kolhydrater", price: 37, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/maurten-gel-100-energigel/no", img: "https://cdn.intersport.se/productimages/690x600/144243201000_10.jpg" },
+  { id: "maurten-gel-100-caf", brand: "Maurten", name: "Maurten Gel 100 CAF 100", type: "gel_caf", carbs: 25, caf: 100, dose: "1 gel = 25g kolhydrater + 100mg koffein", price: 37, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/maurten-gel-100-caf-100-energigel/white", img: "https://cdn.intersport.se/productimages/690x600/146992701000_10.jpg" },
+  { id: "maurten-gel-160", brand: "Maurten", name: "Maurten Gel 160", type: "gel", carbs: 40, dose: "1 gel = 40g kolhydrater", price: 52, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/maurten-gel-160-single-serv-energigel/black", img: "https://cdn.intersport.se/productimages/690x600/157024601000_10.jpg" },
+  { id: "maurten-solid-160", brand: "Maurten", name: "Maurten Solid 160", type: "bar", carbs: 40, dose: "1 bar = 40g kolhydrater", price: 27, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/maurten-solid-160-single-energibar/solid", img: "https://cdn.intersport.se/productimages/690x600/163240101000_10.jpg" },
+  { id: "maurten-bicarb", brand: "Maurten", name: "Maurten Bicarb System", type: "bicarb", dose: "0,3g/kg, intag 60-90 min före", price: 999, url: "https://www.loplabbet.se/landningssida/maurten-bicarb-system", img: null },
+  // ── ENERVIT ──
+  { id: "enervit-presport-cola", brand: "Enervit", name: "Enervit Presport Cola", type: "pre_drink", carbs: 30, caf: 50, dose: "Inta en portion 30 min innan start. Innehåller koffein.", price: 39, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/enervit-presport-cola/cola", img: "https://cdn.intersport.se/productimages/690x600/116529701000_10.jpg" },
+  { id: "enervit-isotonic", brand: "Enervit", name: "Enervit E.Sport Isocarb 2:1 650g", type: "drink_mix", carbs: 60, dose: "2 mätskedar (60g) i 500 ml vatten", price: 199, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/enervit-esport-isocarb-21-burk-650g/citron", img: "https://cdn.intersport.se/productimages/690x600/149726701000_10.jpg" },
+  { id: "enervit-sport-gel", brand: "Enervit", name: "Enervit Sport Gel", type: "gel", carbs: 27, dose: "1 gel = 27g kolhydrater", price: 25, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/enervit-sport-gel/ananas", img: "https://cdn.intersport.se/productimages/690x600/144759301000_10.jpg" },
+  { id: "enervit-liquid-gel", brand: "Enervit", name: "Enervit C2:1 Carbo Gel 60ml", type: "gel", carbs: 40, dose: "1 gel = 40g kolhydrater", price: 35, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/enervit-c21-carbo-gel-orange-60ml/orange", img: "https://cdn.intersport.se/productimages/690x600/156485401000_10.jpg" },
+  { id: "enervit-sport-gel-caf", brand: "Enervit", name: "Enervit Sport Gel + Caffeine", type: "gel_caf", carbs: 27, caf: 100, dose: "1 gel = 27g + 100mg koffein", price: 29, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/enervit-enervit-gel-med-koffein/citron", img: "https://cdn.intersport.se/productimages/690x600/142019001000_10.jpg" },
+  { id: "enervit-sport-bar", brand: "Enervit", name: "Enervit Power Crunchy Bar 40g", type: "bar", carbs: 23, dose: "1-2 bars per timme under aktivitet", price: 27, url: "https://www.loplabbet.se/tillbehor/energi-sportdryck/enervit-power-crunchy-energibar/choklad", img: "https://cdn.intersport.se/productimages/690x600/140924101000_10.jpg" },
+  { id: "enervit-recovery", brand: "Enervit", name: "Enervit R2 Recovery Drink", type: "recovery", dose: "Inom 30 min efter pass", price: 39, url: "https://www.loplabbet.se/enervit", img: null },
+  // ── ÖVRIGT (boosters) ──
+  { id: "nomio-shot", brand: "Nomio", name: "Nomio Kosttillskott", type: "itc", dose: "1 shot 2-3h före tävling/intensivt pass. Pack om 4 flaskor à 60 ml.", price: 236, url: "https://www.loplabbet.se/products/160657501/01", img: "https://cdn.intersport.se/productimages/690x600/160657501000_10.jpg" },
+];
+
+// ─── BERÄKNINGSMOTOR ────────────────────────────────────────────────────────
+// Bygger på etablerad sportnutritionsforskning:
+//  - Cunningham (1980) för basal energi (mer pålitlig för idrottare än Harris-Benedict)
+//  - Boer-formel för LBM-uppskattning
+//  - Margaria/ACSM för löpekonomi (~1 kcal/kg/km)
+//  - Substratutnyttjande från Romijn et al. + könsskillnader (kvinnor mer fett)
+//  - Kolhydratrekommendationer enligt Jeukendrup, Burke & Hawley
+
+function estimateLBM(weight, height, sex) {
+  // Boer-formel - bra approximation utan kroppsfettsmätning
+  if (sex === "man") return (0.407 * weight) + (0.267 * height) - 19.2;
+  return (0.252 * weight) + (0.473 * height) - 48.3;
+}
+
+function bmr(lbm) {
+  // Cunningham: BMR = 500 + 22 × LBM
+  return 500 + 22 * lbm;
+}
+
+// Energi­kostnad för löpning per kg per km
+// Vid normal fart: ca 1 kcal/kg/km. Något högre vid mycket långsam/snabb fart
+function energyCostPerKgKm(speed_mps) {
+  // ACSM-baserad approximation, ger ~0.95-1.10 kcal/kg/km
+  const v = Math.max(2.0, Math.min(6.0, speed_mps));
+  return 0.95 + 0.04 * Math.abs(v - 3.5);
+}
+
+// Uppskatta intensitet (% av VO2max) baserat på distans + relativ fart
+// Längre lopp = lägre genomsnittlig intensitet
+function estimateIntensity(distance_km, time_min, weight, experience) {
+  const speed_mps = (distance_km * 1000) / (time_min * 60);
+  // Bas-intensitet utifrån distans (typiska %VO2max för välltränade)
+  let baseInt;
+  if (distance_km <= 5) baseInt = 0.92;
+  else if (distance_km <= 10) baseInt = 0.87;
+  else if (distance_km <= 21.1) baseInt = 0.82;
+  else if (distance_km <= 30) baseInt = 0.78;
+  else if (distance_km <= 42.2) baseInt = 0.75;
+  else if (distance_km <= 80) baseInt = 0.65;
+  else baseInt = 0.58;
+  // Justera lite efter erfarenhet (avancerad håller högre %VO2max längre)
+  if (experience === "avancerad") baseInt += 0.02;
+  else if (experience === "nyborjare") baseInt -= 0.03;
+  return Math.max(0.5, Math.min(0.95, baseInt));
+}
+
+// Andel av energin som kommer från kolhydrater vid given intensitet
+function carbFraction(intensity, sex) {
+  // Linjär interpolering: 50% VO2max → ~35% carb, 95% VO2max → ~95% carb
+  let frac = 0.30 + (intensity - 0.5) * 1.45;
+  // Kvinnor använder något mer fett (~5% lägre kolhydratandel vid samma intensitet)
+  if (sex === "kvinna") frac -= 0.04;
+  return Math.max(0.25, Math.min(0.95, frac));
+}
+
+// Rekommenderat kolhydratintag per timme under loppet
+function carbsPerHourTarget(time_min, experience, sex) {
+  const t = time_min / 60;
+  let target;
+  if (t < 0.5) target = 0;             // <30 min: vatten räcker
+  else if (t < 0.75) target = 20;      // 30-45 min: lite gärna men inte krav
+  else if (t < 1.25) target = 40;      // 45-75 min: 30-60 g/h
+  else if (t < 2.0) target = 65;       // 75-120 min: 60-75 g/h (en transportör)
+  else if (t < 2.75) target = 85;      // 2-2,75h: börja med dubbla källor
+  else if (t < 4.5) target = 95;       // halv-/maraton-territorium: 90+
+  else if (t < 7.0) target = 80;       // ultra: lite lägre, mer fett-tolerant
+  else target = 70;                    // mycket långa ultra
+  // Justera för erfarenhet (tränad mage tål mer)
+  if (experience === "nyborjare") target *= 0.75;
+  else if (experience === "avancerad") target *= 1.10;
+  // Kvinnor brukar tolerera marginellt lägre toppar
+  if (sex === "kvinna") target *= 0.97;
+  // Avrunda till närmsta 5
+  return Math.round(target / 5) * 5;
+}
+
+// Formaterar minuter till läsbar svensk tid: "1 timme", "2 timmar", "1 h 8 minuter"
+function formatTime(minutes) {
+  const total = Math.round(minutes);
+  const h = Math.floor(total / 60);
+  const m = total - h * 60;
+  if (h === 0) return `${m} minuter`;
+  if (m === 0) return h === 1 ? "1 timme" : `${h} timmar`;
+  return `${h} h ${m} minuter`;
+}
+
+// Vätskebehov per timme (ml) - grov uppskattning baserad på vikt + intensitet
+function fluidPerHour(weight, intensity) {
+  // 6-10 ml/kg/h vid normal löpning, högre vid värme/intensitet
+  const base = weight * 7;
+  const intensityFactor = 0.7 + intensity * 0.6;
+  const ml = base * intensityFactor;
+  // Avrunda till närmsta 50
+  return Math.round(ml / 50) * 50;
+}
+
+// Salt/natrium per timme (mg) - genomsnitt ca 500-700 mg/L svett, men varierar 300-1500
+function sodiumPerHour(weight, intensity) {
+  const fluid_l = fluidPerHour(weight, intensity) / 1000;
+  return Math.round(fluid_l * 600);
+}
+
+// Pre-race kolhydratladdning (totalt g/dag senaste 1-3 dagarna)
+function carbLoadGrams(weight, distance_km) {
+  if (distance_km < 21.1) return null; // Inte nödvändigt under halvmara
+  const gPerKg = distance_km >= 30 ? 10 : 8;
+  return Math.round(weight * gPerKg);
+}
+
+// Pre-race måltid 3-4h innan
+function preRaceMealCarbs(weight, distance_km) {
+  // 1-3 g/kg är vanligt; korta lopp lägre, längre högre
+  let gPerKg;
+  if (distance_km < 10) gPerKg = 1.0;
+  else if (distance_km < 21.1) gPerKg = 1.5;
+  else gPerKg = 2.0;
+  return Math.round(weight * gPerKg);
+}
+
+// Återhämtning första 30 min: 1-1,2 g kolhydrater/kg + 0,3 g protein/kg
+function recoveryCarbs(weight) { return Math.round(weight * 1.1); }
+function recoveryProtein(weight) { return Math.round(weight * 0.3); }
+
+// ─── HUVUDBERÄKNING ─────────────────────────────────────────────────────────
+function calculatePlan(input) {
+  const { sex, age, weight, height, distance, timeMin, experience, brand, boosters } = input;
+  const time_h = timeMin / 60;
+  const speed_mps = (distance * 1000) / (timeMin * 60);
+  const pace_min_per_km = timeMin / distance;
+  
+  const lbm = estimateLBM(weight, height, sex);
+  const restingBMR = bmr(lbm);
+  const intensity = estimateIntensity(distance, timeMin, weight, experience);
+  const ecPerKgKm = energyCostPerKgKm(speed_mps);
+  const totalKcal = Math.round(weight * distance * ecPerKgKm);
+  const carbFrac = carbFraction(intensity, sex);
+  const carbKcal = Math.round(totalKcal * carbFrac);
+  const fatKcal = totalKcal - carbKcal;
+  const carbGrams = Math.round(carbKcal / 4);
+  const fatGrams = Math.round(fatKcal / 9);
+  
+  const carbsHr = carbsPerHourTarget(timeMin, experience, sex);
+  const totalCarbsIntake = Math.round(carbsHr * time_h);
+  const fluidHr = fluidPerHour(weight, intensity);
+  const sodiumHr = sodiumPerHour(weight, intensity);
+  
+  const carbLoad = carbLoadGrams(weight, distance);
+  const preMeal = preRaceMealCarbs(weight, distance);
+  const recCarbs = recoveryCarbs(weight);
+  const recProt = recoveryProtein(weight);
+  
+  // Glykogenlager (300-500g lagrat hos vältränad person, ~weight*4.5g)
+  // Används för informationstexten längst ner — själva intagsplanen
+  // är redan optimerad för att inte tömma lagren.
+  const glycogenStores = Math.round(weight * 4.5);
+  
+  return {
+    // Person
+    lbm: Math.round(lbm * 10) / 10,
+    restingBMR: Math.round(restingBMR),
+    // Lopp
+    distance, timeMin, time_h, pace_min_per_km, speed_mps, intensity,
+    // Energi
+    totalKcal, carbKcal, fatKcal, carbGrams, fatGrams, carbFrac,
+    // Intag
+    carbsHr, totalCarbsIntake, fluidHr, sodiumHr,
+    // Pre/post
+    carbLoad, preMeal, recCarbs, recProt,
+    // Glykogen
+    glycogenStores,
+    // User input
+    sex, age, weight, height, experience, brand, boosters,
+  };
+}
+
+// ─── PRODUKTREKOMMENDATIONER ────────────────────────────────────────────────
+// Tar fram konkret förslag baserat på beräkning + märkesönskemål
+function suggestProducts(plan, products) {
+  const { brand, boosters, time_h, carbsHr, totalCarbsIntake, distance, recCarbs } = plan;
+  
+  // Filter på märke
+  const filterByBrand = (list) => {
+    if (brand === "alla") return list;
+    if (brand === "umara") return list.filter(p => p.brand === "Umara");
+    if (brand === "maurten") return list.filter(p => p.brand === "Maurten");
+    if (brand === "enervit") return list.filter(p => p.brand === "Enervit");
+    return list;
+  };
+  
+  const inStock = products.filter(p => p.inStock !== false);
+  
+  // Singel-förpackningar först — som rekommendation är en enskild gel mer
+  // "levande" och inspirerande än en kartong med 20 st.
+  const singleFirst = (a, b) => {
+    const am = isMultiPack(a.name), bm = isMultiPack(b.name);
+    if (am !== bm) return am ? 1 : -1;
+    return 0;
+  };
+  const inStockSorted = [...inStock].sort(singleFirst);
+  const allByBrand = filterByBrand(inStockSorted);
+  
+  // Hjälpare: hämta första produkt av en typ.
+  // Logik:
+  //  1. Om användaren valt ett specifikt märke och det märket har produkten
+  //     i den efterfrågade typen → använd den.
+  //  2. Annars: använd typ-specifik prio från PREFERRED_BY_TYPE så vi alltid
+  //     rekommenderar t.ex. Umara U Salty på electrolyte, Maurten på bicarb,
+  //     etc. Det ger automatiskt en bra mix av märken över hela planen.
+  //  3. Sista fallback: vilken produkt som helst av rätt typ.
+  // Om typen har en AVOID_PATTERN så undviker vi produkter med det mönstret
+  // i namnet (t.ex. "Pre Sport GEL" på pre_drink-rollen).
+  const pick = (type) => {
+    const avoidRx = AVOID_PATTERNS[type];
+    const okName = (p) => !avoidRx || !avoidRx.test(p.name);
+    const findOk = (arr) => arr.find(okName) || arr[0];
+    
+    // 1. Användarens valda brand
+    if (allByBrand.length < inStockSorted.length) {
+      const inBrandCands = allByBrand.filter(p => p.type === type);
+      if (inBrandCands.length) return findOk(inBrandCands);
+    }
+    // 2. Typ-specifik prio
+    const pref = PREFERRED_BY_TYPE[type] || BRAND_PRIORITY;
+    for (const brand of pref) {
+      const cands = inStockSorted.filter(p => p.type === type && p.brand === brand);
+      if (cands.length) return findOk(cands);
+    }
+    // 3. Vad som helst av rätt typ
+    const all = inStockSorted.filter(p => p.type === type);
+    return all.length ? findOk(all) : undefined;
+  };
+  const pickAll = (type) => allByBrand.filter(p => p.type === type);
+  
+  // ── INNAN ──
+  // Varje item får en sortKey = ungefärlig starttid i minuter före loppet.
+  // Beforeplanen sorteras sedan så att tidigast aktivitet kommer först.
+  const beforePlan = [];
+  // Kolhydratladdning (>halv-mara)
+  if (plan.carbLoad) {
+    // Förslå sportdryckspulver som enkelt komplement till maten.
+    // VIKTIGT: vi ska INTE rekommendera koffein-versioner under laddningen
+    // (Maurten Drink Mix 320 CAF 100). Filtrera bort både caf och koffein.
+    const isCafFree = (p) => !/caf|koffein/i.test(p.name) && !p.caf;
+    const isLoadingDrink = (p) => p.type === "drink_mix" && /320|loader/i.test(p.name);
+    const loadingDrink = allByBrand.find(p => isLoadingDrink(p) && isCafFree(p))
+                       || inStockSorted.find(p => isLoadingDrink(p) && isCafFree(p))
+                       || allByBrand.find(p => p.type === "drink_mix" && isCafFree(p))
+                       || inStockSorted.find(p => p.type === "drink_mix" && isCafFree(p));
+    beforePlan.push({
+      sortKey: 4320, // 3 dagar
+      timing: "1-3 dagar före",
+      heading: "Kolhydratladdning",
+      detail: `Sikta på ${plan.carbLoad}g kolhydrater per dag (vanlig mat: pasta, ris, bröd, frukt). Det fyller dina glykogendepåer maximalt. Tips: en sportdryck som ${loadingDrink ? loadingDrink.name : "Maurten Drink Mix 320"} är ett enkelt sätt att komplettera maten, speciellt sista dagarna när magen ändå inte vill ha mer fast föda.`,
+      product: loadingDrink,
+    });
+  }
+  // Beetroot generisk (om vald)
+  if (boosters.includes("beetroot")) {
+    const beet = pick("beetroot");
+    beforePlan.push({
+      sortKey: 7200, // 5 dagar (laddning startar tidigast av allt)
+      timing: "Sista intag 2,5h före start (ev. ladda 4-7 dagar innan)",
+      heading: "Rödbetsshot (nitrat)",
+      detail: "Nitrat förbättrar löpekonomin och kan ge 1-3% prestationsökning. Drick din shot ca 2,5 timmar före start. För maximerad effekt kan du buffra med 1 shot/dag i 4-7 dagar inför tävlingen. Tips: undvik att spotta de sista timmarna före start, det avbryter omvandlingen från nitrat till kväveoxid i munnen.",
+      product: beet,
+    });
+  }
+  // Måltid
+  beforePlan.push({
+    sortKey: 240, // 4 timmar
+    timing: "3-4 timmar före",
+    heading: "Pre-race måltid",
+    detail: `Sikta på ca ${plan.preMeal}g lättsmälta kolhydrater. Klassiker: havregrynsgröt med banan + honung, vitt bröd med marmelad, eller riskaka med jordnötssmör. Drick 5-7 ml vätska per kg (${Math.round(plan.weight * 6)} ml) under förmiddagen.`,
+    product: null,
+  });
+  // Nomio (akut effekt, tas 2-3h innan)
+  if (boosters.includes("nomio")) {
+    const nomio = allByBrand.find(p => p.id === "160657501")
+               || inStock.find(p => p.id === "160657501")
+               || allByBrand.find(p => /nomio/i.test(p.brand))
+               || inStock.find(p => /nomio/i.test(p.brand))
+               || FALLBACK_PRODUCTS.find(p => p.id === "nomio-shot");
+    beforePlan.push({
+      sortKey: 180, // 3 timmar
+      timing: "2-3h före start",
+      heading: "Nomio prestationsshot",
+      detail: "Svensk shot baserad på isotiocyanater (ITC) från ekologiska broccoligroddar. Forskning från Karolinska och GIH visar minskad mjölksyrauppbyggnad och skydd mot oxidativ stress vid intensiv aktivitet. Effekten är akut, ta en flaska 2-3 timmar före start. Skonsam för magen.",
+      product: nomio,
+    });
+  }
+  // Bicarb (om vald + tillräckligt experience)
+  if (boosters.includes("bicarb")) {
+    const bic = pick("bicarb");
+    beforePlan.push({
+      sortKey: 90, // 60-90 min
+      timing: "60-90 min före start",
+      heading: "Bikarbonat (laktat-buffert)",
+      detail: `Dosera ${(plan.weight * 0.3).toFixed(0)}g bikarbonat (0,3g/kg). Buffrar laktat och passar bäst för korta-medellånga lopp upp till ca 30 min racetid där laktatet blir begränsande. Endast för vana löpare med intränad mage.`,
+      product: bic,
+    });
+  }
+  // Pre-workout / koffein
+  if (time_h >= 0.5) {
+    // Prioritetsordning för "sista pre-race-boost":
+    //  1. Brand-preferens har specifik pre_drink (Enervit Pre Sport) → använd den
+    //  2. Brand-preferens har koffein-gel → använd den (samma effekt + brand-konsistens)
+    //  3. Brand-preferens har vanlig gel → använd den + nämn koffein som tillval
+    //  4. Sista fallback: pre_drink från valfritt märke
+    const brandPreDrink = allByBrand.find(p => p.type === "pre_drink");
+    const brandGelCaf  = allByBrand.find(p => p.type === "gel_caf");
+    const brandGel     = allByBrand.find(p => p.type === "gel");
+    const anyPreDrink  = inStockSorted.find(p => p.type === "pre_drink");
+    const anyGelCaf    = inStockSorted.find(p => p.type === "gel_caf");
+    
+    let preProduct = null;
+    let preDetail = "";
+    const shortRace = time_h < 1.5;
+    
+    if (brandPreDrink) {
+      preProduct = brandPreDrink;
+      preDetail = `${brandPreDrink.name} är specifikt utformad som pre-race-energi med snabba kolhydrater och koffein. Ta den 30-45 min innan start så hinner koffeinet ge full effekt lagom till starten.`;
+    } else if (brandGelCaf) {
+      preProduct = brandGelCaf;
+      preDetail = `Ta ${brandGelCaf.name} cirka 30-45 min innan start. Koffein behöver 20-30 min för att ge full effekt, då kommer den vara på plats precis när du startar.${shortRace ? " På ett kort lopp som detta är timingen extra viktig: tar du koffeinet vid start hinner du knappt få effekten innan du är i mål." : ""}`;
+    } else if (brandGel) {
+      preProduct = brandGel;
+      preDetail = `Ta ${brandGel.name} 15-30 min innan start för en sista energiboost precis när loppet drar igång.${anyGelCaf ? " Vill du också ha koffein? Komplettera med en koffein-gel ca 30-45 min före start så hinner effekten komma igång till starten." : ""}`;
+    } else if (anyPreDrink) {
+      preProduct = anyPreDrink;
+      preDetail = `${anyPreDrink.name} ger snabb energi och koffein inför start. Ta den 30-45 min innan start.`;
+    } else {
+      preDetail = `Drick en pre-workout med koffein (3-6 mg/kg = ${Math.round(plan.weight * 4)} mg) ca 30-45 min innan start. Ta gärna en gel också ca 15 min innan starten.`;
+    }
+    
+    beforePlan.push({
+      sortKey: 45, // 30-60 min
+      timing: "30-60 min före start",
+      heading: "Sista pre-race-boost",
+      detail: preDetail,
+      product: preProduct,
+    });
+  }
+  // Sortera kronologiskt (störst sortKey = tidigast aktivitet först)
+  beforePlan.sort((a, b) => b.sortKey - a.sortKey);
+  
+  // ── UNDER ──
+  const duringPlan = [];
+  if (carbsHr === 0) {
+    duringPlan.push({
+      heading: "Bara vatten",
+      detail: `Loppet är så kort (${Math.round(time_h * 60)} min) att kolhydratintag inte gör någon skillnad. Drick några klunkar vatten om du blir törstig, det räcker.`,
+      products: [],
+    });
+  } else if (carbsHr <= 25) {
+    // Korta lopp där en gel är valfritt snarare än rekommenderat
+    const optGel = pick("gel");
+    duringPlan.push({
+      heading: "Ta gärna en gel, men det är ofta inte nödvändigt",
+      detail: `På ett lopp på ${Math.round(time_h * 60)} minuter räcker dina glykogendepåer som regel hela vägen. Vill du ändå ha lite extra energi (eller känner att du bränner mycket) kan du ta en gel ungefär halvvägs. Drick efter törst, ca ${plan.fluidHr} ml/h om du svettas mycket.`,
+      products: optGel ? [{
+        product: optGel,
+        amount: "0-1 st",
+        carbs: optGel.carbs,
+        note: "Valfritt. Ta runt halvtid om du vill ha extra energi.",
+      }] : [],
+    });
+  } else {
+    // Beräkna intag
+    const totalNeeded = totalCarbsIntake;
+    
+    // Bygg ett konkret upplägg: dryck + gels
+    const drinkMix = pick("drink_mix");
+    const gel = pick("gel");
+    const gelCaf = pick("gel_caf");
+    const bar = pick("bar");
+    
+    // Strategi: ~50% från dryck, ~40% från gels, ~10% bar (om långt)
+    let drinkCarbs = 0, gelCount = 0, gelCafCount = 0, barCount = 0;
+    
+    if (time_h < 1) {
+      // Kort: bara gel (1-2 st)
+      gelCount = Math.max(1, Math.round(totalNeeded / (gel?.carbs || 25)));
+    } else if (time_h < 2) {
+      // Halv-mara-kort: dryck + 2-3 gels
+      drinkCarbs = Math.round(totalNeeded * 0.4);
+      gelCount = Math.round(totalNeeded * 0.6 / (gel?.carbs || 25));
+    } else if (time_h < 3.5) {
+      // Maraton: dryck + 4-6 gels (varav 1-2 koffein)
+      drinkCarbs = Math.round(totalNeeded * 0.45);
+      const gelTotal = Math.round(totalNeeded * 0.55 / (gel?.carbs || 25));
+      gelCafCount = Math.min(2, Math.floor(gelTotal / 3));
+      gelCount = gelTotal - gelCafCount;
+    } else {
+      // Ultra: dryck + gels + bars
+      drinkCarbs = Math.round(totalNeeded * 0.4);
+      barCount = Math.round((totalNeeded * 0.25) / (bar?.carbs || 30));
+      const gelTotal = Math.round((totalNeeded * 0.35) / (gel?.carbs || 25));
+      gelCafCount = Math.min(3, Math.floor(gelTotal / 4));
+      gelCount = gelTotal - gelCafCount;
+    }
+    
+    const items = [];
+    if (drinkCarbs > 0 && drinkMix) {
+      const portions = Math.ceil(drinkCarbs / drinkMix.carbs);
+      items.push({
+        product: drinkMix,
+        amount: `${portions} portion${portions > 1 ? "er" : ""}`,
+        carbs: portions * drinkMix.carbs,
+        note: drinkMix.brand === "Maurten" 
+          ? `Blanda i ${portions * 500} ml vatten, drick jämnt under loppet (~${Math.round(plan.fluidHr)} ml/h)`
+          : `Blanda ${portions} skopor i ${portions * 250} ml vatten eller motsvarande`,
+      });
+    }
+    if (gelCount > 0 && gel) {
+      items.push({
+        product: gel,
+        amount: `${gelCount} st`,
+        carbs: gelCount * gel.carbs,
+        note: `Ta en gel var ${Math.round((time_h * 60) / Math.max(1, gelCount + gelCafCount))} min`,
+      });
+    }
+    if (gelCafCount > 0 && gelCaf) {
+      // Koffein behöver 20-30 min för full effekt — anpassa rådet efter lopplängd.
+      let cafNote;
+      if (time_h < 1.5) {
+        cafNote = `Koffein behöver 20-30 min för full effekt. Ta din första koffein-gel direkt vid start (eller 15-30 min innan) så hinner den ge effekt under loppet.`;
+      } else if (time_h < 3) {
+        cafNote = `Ta din första koffein-gel tidigt, efter ⅓ av loppet eller direkt vid start om du vill ha boost från första kilometern. Effekten kommer efter 20-30 min.`;
+      } else {
+        cafNote = `Ta första koffein-gelen vid halvtid eller något tidigare så peakar effekten under loppets tuffaste del. Spara gärna en till sista kvarten.`;
+      }
+      items.push({
+        product: gelCaf,
+        amount: `${gelCafCount} st`,
+        carbs: gelCafCount * gelCaf.carbs,
+        note: cafNote,
+      });
+    }
+    if (barCount > 0 && bar) {
+      // På långa ultralopp (4h+) lider många av smak-/textur-trötthet.
+      // Om användaren inte valt ett specifikt märke och vi har bars från
+      // flera märken: splittra mängden över två olika märken så det blir
+      // variation på smak och konsistens längs loppet.
+      const userPickedBrand = allByBrand.length < inStockSorted.length;
+      let barProducts = [bar];
+      if (!userPickedBrand && time_h >= 4 && barCount >= 2) {
+        // Hitta en alternativ bar från ett annat märke
+        const altBar = inStockSorted.find(p => 
+          p.type === "bar" && 
+          p.brand !== bar.brand && 
+          BRAND_PRIORITY.includes(p.brand)
+        );
+        if (altBar) barProducts = [bar, altBar];
+      }
+      
+      if (barProducts.length === 1) {
+        items.push({
+          product: bar,
+          amount: `${barCount} st`,
+          carbs: barCount * bar.carbs,
+          note: "Bra på lugnare partier när du orkar tugga. Mättar mer än gels.",
+        });
+      } else {
+        // Två märken: dela ungefär jämnt
+        const half = Math.ceil(barCount / 2);
+        const rest = barCount - half;
+        items.push({
+          product: barProducts[0],
+          amount: `${half} st`,
+          carbs: half * barProducts[0].carbs,
+          note: "Bra på lugnare partier när du orkar tugga. Mättar mer än gels.",
+        });
+        items.push({
+          product: barProducts[1],
+          amount: `${rest} st`,
+          carbs: rest * (barProducts[1].carbs || 30),
+          note: "Variation i smak och textur är guld på långa ultralopp då man lätt får matleda.",
+        });
+      }
+    }
+    
+    duringPlan.push({
+      heading: `Sikta på ${carbsHr} g kolhydrater per timme`,
+      detail: `Totalt ca ${totalNeeded}g över loppets ${formatTime(time_h * 60)}. Drick ungefär ${plan.fluidHr} ml vätska/h med ca ${plan.sodiumHr} mg natrium.`,
+      products: items,
+    });
+    
+    // Gel-flaska om det blir många gels att hantera
+    const totalGels = gelCount + gelCafCount;
+    if (totalGels >= 4) {
+      duringPlan.push({
+        heading: "Tips: häll gels i en mjukflaska",
+        detail: `Med ${totalGels} gels att hantera under loppet blir det smidigare att tömma dem i en mjukflaska än att fippla med varsin förpackning. Du får då också möjlighet att ta små klunkar oftare istället för att tömma en hel gel åt gången – mer jämn energitillförsel och snällare mot magen. Späd gärna ut med lite vatten i flaskan om gelen är trögflytande.`,
+        products: [{
+          product: SOFT_FLASK_PRODUCT,
+          amount: "1 st",
+          carbs: 0,
+          note: "Rymmer ca 5 gels. Rensbar och återanvändbar.",
+        }],
+      });
+    }
+    
+    // Bansport-info — visas när det är ett lopp där bansport är vanligt (10K+).
+    // Tipsar att räkna med stationerna i planen, men att gels är primär källa.
+    if (time_h >= 0.6) {
+      duringPlan.push({
+        heading: "Vätskestationer på loppet",
+        detail: `De flesta lopp erbjuder vatten och ofta sportdryck (vanligen Maurten, Enervit eller motsvarande beroende på arrangör) vid stationerna. Räkna med stationerna i din vätskeplan, men gör gels till din primära energikälla – då har du full kontroll på dosen och vet att smaken funkar för dig. Sportdrycken på stationerna är en bra bonus, särskilt sista milen. Tips: kolla loppets hemsida i förväg för att se vilket märke som serveras, då kan du testa det på något träningspass innan.`,
+        products: [],
+      });
+    }
+    
+    // Elektrolyter om långt + varmt
+    if (time_h > 1.5) {
+      const elec = pick("electrolyte");
+      if (elec) {
+        duringPlan.push({
+          heading: "Salttabletter vid värme/svett",
+          detail: "Om det är varmt (>20°C) eller du svettas mycket, lägg till salttabletter i flaskan. Riktmärke: 1 tab per 250-500 ml utöver det som finns i sportdrycken.",
+          products: [{ product: elec, amount: "1-3 st under loppet", note: elec.dose }],
+        });
+      }
+    }
+    
+    // Ultra-specifika tips (4h+ lopp, men särskilt för riktiga ultralopp)
+    if (time_h >= 4) {
+      duringPlan.push({
+        heading: "Strategi för långa lopp",
+        detail: `På lopp över 4 timmar tappar magen successivt sin förmåga att ta upp koncentrerade kolhydrater och smaktrötthet är ofta det som faktiskt avgör – inte själva energin. Några konkreta råd: (1) Variera mellan söta och salta produkter, det är därför vi föreslagit bars från olika märken om du valt "spelar ingen roll". (2) Komplettera med riktig mat på checkpoints om loppet erbjuder det – riskaka, salta kex, banan, soppa. (3) Drick efter törst men aldrig under ${Math.round(plan.fluidHr * 0.6)} ml/h, hyponatremi är en reell risk när man dricker rent vatten under många timmar. (4) Ha en plan B – om en produkt slutar funka i magen, byt direkt istället för att tvinga in den.`,
+        products: [],
+      });
+    }
+  }
+  
+  // ── EFTER ──
+  const afterPlan = [];
+  afterPlan.push({
+    timing: "0-30 minuter efter mål",
+    heading: "Snabb återhämtning",
+    detail: `Här är glykogensyntesen som högst. Få i dig ${recCarbs}g kolhydrater + ${plan.recProt}g protein så fort som möjligt. En återhämtningsdryck löser det enkelt och du slipper tugga när du är trött.`,
+    product: pick("recovery"),
+  });
+  afterPlan.push({
+    timing: "1-3 timmar efter",
+    heading: "Riktig måltid",
+    detail: `Ät en komplett måltid med kolhydrater + protein + grönsaker. Tex pasta med kött och tomatsås, sushi, eller en stor smörgås med skinka och ost. Drick 1,5x vätskeförlusten (väg dig före och efter om du vill ha exakt).`,
+    product: null,
+  });
+  
+  return { beforePlan, duringPlan, afterPlan };
+}
+
+// ─── STEG-DEFINITIONER ──────────────────────────────────────────────────────
+const DISTANCES = [
+  { id: 5, label: "5 km", desc: "Bana eller kort lopp", icon: "lightning" },
+  { id: 10, label: "10 km", desc: "Klassisk distans", icon: "runner" },
+  { id: 21.1, label: "Halvmaraton", desc: "21,1 km", icon: "target" },
+  { id: 42.195, label: "Maraton", desc: "42,195 km", icon: "trophy" },
+  { id: 50, label: "Ultra 50 km", desc: "Trail eller landsväg", icon: "mountain" },
+  { id: 100, label: "Ultra 100 km", desc: "Långultra", icon: "mountains" },
+  { id: -1, label: "Annan distans", desc: "Ange själv (km)", icon: "pencil" },
+];
+
+// Naturligt namn på distansen för dynamisk frågetext, t.ex.
+// "Vad siktar du på för tid på maran?" istället för generiskt "...på loppet?".
+function getDistanceName(ans) {
+  const d = ans.distance;
+  if (d === 5) return "5K";
+  if (d === 10) return "10K";
+  if (d === 21.1) return "halvmaran";
+  if (d === 42.195) return "maran";
+  if (d === 50 || d === 100) return "ultran";
+  if (d === -1) {
+    const km = parseFloat(ans.customDistance);
+    return km > 0 ? `${km} km` : "loppet";
+  }
+  return "loppet";
+}
+
+const STEPS = [
+  { id: "distance", q: "Vilket lopp gäller det?", icon: "flag",
+    sub: "Vi anpassar hela energiplanen efter loppets längd och dina förutsättningar." },
+  { id: "sex", q: "Kön?", icon: "sex_both",
+    sub: "Påverkar både energiformeln (Cunningham) och hur kroppen växlar mellan fett/kolhydrater." },
+  { id: "metrics", q: "Kropp & ålder", icon: "ruler",
+    sub: "Vi använder Cunninghams ekvation som är pålitligast för idrottande personer." },
+  { id: "time", q: "Vad siktar du på för måltid?", icon: "stopwatch",
+    sub: "Sluttiden styr intensiteten, och därmed hur mycket kolhydrater du behöver." },
+  { id: "experience", q: "Hur tränad är du på att äta under löpning?", icon: "bicep",
+    sub: "Magtålighet är en träningsfråga. Avancerade kan gå högre i kolhydrater per timme." },
+  { id: "brand", q: "Märkesönskemål?", icon: "tag",
+    sub: "Vi rekommenderar produkter ur Löplabbets sortiment. Välj favorit eller blanda." },
+  { id: "boosters", q: "Vill du ha med några boosters?", icon: "flask",
+    sub: "Avancerade tillskott som ger små men reella prestationsvinster." },
+];
+
+// ─── CSS ────────────────────────────────────────────────────────────────────
+const css = `
+@import url('https://fonts.cdnfonts.com/css/tt-commons-pro');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#ffffff;--surf:#fafafa;--surf2:#f4f4f5;--brd:#e7e7e7;--brd2:#d4d4d4;
+  --txt:#0a0a0a;--mut:#525252;--dim:#a1a1a1;
+  --green:#0D9488;--green-dk:#0F766E;--green-light:#14B8A6;
+  --orange:#EA580C;--orange-lt:#F97316;
+  --blue:#2563EB;--blue-lt:#3B82F6;
+  --warn:#DC2626;
+  --font:'TT Commons Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --serif:'Fraunces','Georgia',serif;
+}
+html,body{background:var(--bg);}
+body{font-family:var(--font);color:var(--txt);-webkit-font-smoothing:antialiased;}
+
+.ek{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);
+  background-image:radial-gradient(circle at 85% -5%,rgba(13,148,136,.06),transparent 55%),
+                   radial-gradient(circle at -5% 100%,rgba(37,99,235,.05),transparent 55%);}
+.ek-wrap{width:100%;max-width:720px;margin:0 auto;padding:24px 20px 60px;flex:1;display:flex;flex-direction:column;}
+
+/* ── HEADER ── */
+.ek-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--brd);}
+.ek-head-l{display:flex;align-items:center;gap:14px;}
+.ek-logo{height:32px;object-fit:contain;}
+.ek-tag{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--green);padding:4px 10px;border:1px solid var(--green);border-radius:3px;}
+.ek-step-counter{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);}
+
+/* ── PROGRESS ── */
+.ek-prog{height:2px;background:var(--brd);border-radius:2px;margin-bottom:36px;overflow:hidden;}
+.ek-prog-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--orange));border-radius:2px;transition:width .5s cubic-bezier(.2,.8,.2,1);}
+
+/* ── INTRO ── */
+.ek-intro{flex:1;display:flex;flex-direction:column;justify-content:center;animation:fadeUp .5s ease;padding:20px 0;}
+.eye{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.eye::after{content:"";width:32px;height:1px;background:var(--green);}
+.ek-h1{font-family:var(--font);font-weight:800;font-size:clamp(36px,8vw,64px);line-height:.95;letter-spacing:-.02em;margin-bottom:24px;color:var(--txt);}
+.ek-h1 em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--green);}
+.ek-intro-body{font-size:16px;line-height:1.6;color:var(--mut);margin-bottom:32px;max-width:540px;}
+.ek-intro-body strong{color:var(--txt);font-weight:600;}
+.ek-bullets{display:flex;flex-direction:column;gap:10px;margin-bottom:36px;max-width:540px;}
+.ek-bullet{display:flex;align-items:start;gap:12px;font-size:14px;color:var(--mut);line-height:1.5;}
+.ek-bullet-dot{flex-shrink:0;width:6px;height:6px;background:var(--orange);border-radius:50%;margin-top:7px;}
+.ek-cta{background:var(--green);color:#fff;border:none;font-family:var(--font);font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:18px 36px;border-radius:8px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:10px;align-self:flex-start;}
+.ek-cta:hover:not(:disabled){background:var(--green-dk);transform:translateY(-1px);box-shadow:0 8px 24px rgba(13,148,136,.25);}
+.ek-cta:disabled{opacity:.4;cursor:wait;}
+.ek-cta .arr{font-size:18px;transition:transform .2s;}
+.ek-cta:hover:not(:disabled) .arr{transform:translateX(4px);}
+.ek-loadnote{font-size:12px;color:var(--dim);margin-top:14px;display:flex;align-items:center;gap:8px;}
+.ek-mini-spinner{width:12px;height:12px;border:1.5px solid var(--brd2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
+.ek-mini-check{color:var(--green);font-weight:700;}
+
+/* ── STEG ── */
+.ek-step{flex:1;animation:fadeUp .35s ease;}
+.ek-q-ico{margin-bottom:14px;display:block;color:var(--green);}
+.ek-q-ico svg{width:30px;height:30px;}
+.ek-q-h{font-family:var(--font);font-weight:800;font-size:clamp(26px,5.5vw,40px);line-height:1.05;letter-spacing:-.01em;margin-bottom:8px;color:var(--txt);}
+.ek-q-sub{font-size:14px;color:var(--mut);margin-bottom:28px;line-height:1.55;max-width:520px;}
+
+/* ── OPTIONS (knappkort) ── */
+.ek-opts{display:flex;flex-direction:column;gap:8px;}
+.ek-opt{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border:1.5px solid var(--brd);border-radius:10px;background:var(--surf);cursor:pointer;transition:all .15s ease;text-align:left;width:100%;color:var(--txt);font-family:var(--font);}
+.ek-opt:hover{border-color:var(--brd2);background:var(--surf2);}
+.ek-opt.sel{border-color:var(--green);background:rgba(13,148,136,.05);}
+.ek-opt-ico{width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--mut);transition:color .15s;margin-top:-2px;}
+.ek-opt:hover .ek-opt-ico{color:var(--txt);}
+.ek-opt.sel .ek-opt-ico{color:var(--green);}
+
+/* Varumärkesaccenter på brand-väljaren — samma färgsystem som produktkorten.
+   Färgen syns alltid (även i ovalt läge) så det blir tydligt direkt vilket märke
+   som är vad. */
+.ek-opt[data-brand="Maurten"]{--brand-c:#1a1a1a;}
+.ek-opt[data-brand="Enervit"]{--brand-c:#C8102E;}
+.ek-opt[data-brand="Umara"]{--brand-c:#4F5A66;}
+.ek-opt[data-brand]{box-shadow:inset 3px 0 0 var(--brand-c);}
+.ek-opt[data-brand] .ek-opt-ico{color:var(--brand-c);}
+.ek-opt[data-brand]:hover{border-color:var(--brand-c);box-shadow:inset 3px 0 0 var(--brand-c);}
+.ek-opt[data-brand].sel{border-color:var(--brand-c);background:color-mix(in srgb,var(--brand-c) 6%,transparent);box-shadow:inset 3px 0 0 var(--brand-c);}
+.ek-opt[data-brand].sel .ek-opt-ico{color:var(--brand-c);}
+.ek-opt[data-brand].sel .ek-chk{background:var(--brand-c);border-color:var(--brand-c);}
+.ek-opt-txt{flex:1;min-width:0;}
+.ek-opt-lbl{font-family:var(--font);font-weight:700;font-size:15px;margin-bottom:3px;color:var(--txt);}
+.ek-opt-dsc{font-size:12.5px;color:var(--mut);line-height:1.5;}
+.ek-chk{margin-top:5px;}
+.ek-chk{width:20px;height:20px;border:1.5px solid var(--brd2);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--bg);}
+.ek-opt.sel .ek-chk{background:var(--green);border-color:var(--green);}
+.ek-dot{width:7px;height:7px;background:#000;border-radius:50%;}
+.ek-opt-dim{opacity:.4;cursor:not-allowed;}
+.ek-opt-warn{font-size:11px;color:var(--warn);margin-top:4px;display:inline-flex;align-items:center;gap:5px;}
+.ek-opt-warn svg{flex-shrink:0;}
+
+/* multi-select - kvadratisk checkbox */
+.ek-opt.multi .ek-chk{border-radius:4px;}
+.ek-opt.multi.sel .ek-dot{display:none;}
+.ek-opt.multi.sel .ek-chk::after{content:"✓";color:#fff;font-size:13px;font-weight:800;}
+
+/* ── INPUT-FÄLT ── */
+.ek-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+@media(max-width:480px){.ek-grid{grid-template-columns:1fr;}}
+.ek-field{display:flex;flex-direction:column;gap:6px;}
+.ek-field-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);}
+.ek-input{background:var(--surf);border:1.5px solid var(--brd);border-radius:8px;padding:14px 16px;font-size:16px;color:var(--txt);font-family:var(--font);font-weight:600;transition:all .15s;outline:none;}
+.ek-input:focus{border-color:var(--green);background:var(--surf2);}
+.ek-input::placeholder{color:var(--dim);font-weight:500;}
+.ek-input-wrap{position:relative;}
+.ek-input-suffix{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--mut);font-weight:600;pointer-events:none;}
+
+/* ── TIME PICKER ── */
+.ek-time{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
+.ek-time-input{flex:1;text-align:center;font-size:24px;font-weight:800;background:var(--surf);border:1.5px solid var(--brd);border-radius:8px;padding:14px 0;color:var(--txt);font-family:var(--font);outline:none;transition:all .15s;}
+.ek-time-input:focus{border-color:var(--green);}
+.ek-time-sep{font-size:24px;font-weight:800;color:var(--mut);}
+.ek-time-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);padding:0 4px;}
+.ek-time-meta strong{color:var(--green);font-weight:700;}
+
+/* ── NAV ── */
+.ek-nav{display:flex;align-items:center;justify-content:space-between;margin-top:36px;gap:12px;}
+.btn{font-family:var(--font);font-weight:700;letter-spacing:.04em;border-radius:8px;border:none;cursor:pointer;transition:all .2s;font-size:13px;padding:13px 26px;text-transform:uppercase;}
+.btn-back{background:transparent;color:var(--mut);border:1.5px solid var(--brd);}
+.btn-back:hover{color:var(--txt);border-color:var(--brd2);}
+.btn-next{background:var(--green);color:#fff;}
+.btn-next:hover:not(:disabled){background:var(--green-dk);}
+.btn-next:disabled{opacity:.3;cursor:not-allowed;}
+
+/* ── RESULT-PAGE ── */
+.ek-result{animation:fadeUp .5s ease;}
+.ek-result-eye{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.ek-result-eye::after{content:"";width:32px;height:1px;background:var(--green);}
+.ek-result-h{font-family:var(--font);font-weight:800;font-size:clamp(32px,6vw,52px);line-height:1;letter-spacing:-.02em;margin-bottom:16px;}
+.ek-result-h em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--green);}
+.ek-result-sub{font-size:15px;color:var(--mut);line-height:1.55;margin-bottom:32px;max-width:600px;}
+.ek-result-sub strong{color:var(--txt);font-weight:600;}
+
+/* Stats-grid */
+.ek-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:36px;}
+.ek-stat{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:16px;}
+.ek-stat-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;display:inline-flex;align-items:center;gap:5px;}
+.ek-stat-lbl svg{flex-shrink:0;}
+.ek-stat-val{font-family:var(--font);font-weight:800;font-size:24px;letter-spacing:-.01em;line-height:1;color:var(--txt);}
+.ek-stat-val .unit{font-size:13px;color:var(--mut);font-weight:600;margin-left:4px;}
+.ek-stat.accent .ek-stat-val{color:var(--green);}
+.ek-stat.warn{border-color:rgba(220,38,38,.35);}
+.ek-stat.warn .ek-stat-val{color:var(--warn);}
+
+/* Liten pedagogisk inforuta direkt under stats — knyter ihop intaget
+   med kroppens egna glykogenlager. */
+.ek-insight{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;margin:-8px 0 36px;background:rgba(34,139,84,.06);border:1px solid rgba(34,139,84,.18);border-radius:10px;}
+.ek-insight-ico{flex-shrink:0;color:var(--green);margin-top:2px;}
+.ek-insight-body{font-size:13.5px;line-height:1.55;color:var(--txt);}
+.ek-insight-body strong{font-weight:700;color:var(--green);}
+
+/* Sektioner */
+.ek-section{margin-bottom:40px;}
+.ek-section-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;padding-bottom:12px;border-bottom:2px solid var(--brd);}
+.ek-section-num{font-family:var(--serif);font-style:italic;font-weight:400;font-size:36px;line-height:1;}
+.ek-section-num.before{color:var(--green);}
+.ek-section-num.during{color:var(--orange);}
+.ek-section-num.after{color:var(--blue);}
+.ek-section-title{font-family:var(--font);font-weight:800;font-size:24px;letter-spacing:-.01em;color:var(--txt);text-transform:uppercase;}
+.ek-section-sub{font-size:13px;color:var(--mut);margin-bottom:20px;line-height:1.5;}
+
+/* Plan-block */
+.ek-block{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+.ek-block-timing{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:8px;}
+.ek-block-during .ek-block-timing{color:var(--orange);}
+.ek-block-after .ek-block-timing{color:var(--blue);}
+.ek-block-h{font-family:var(--font);font-weight:700;font-size:18px;margin-bottom:8px;color:var(--txt);letter-spacing:-.005em;}
+.ek-block-detail{font-size:14px;color:var(--mut);line-height:1.55;margin-bottom:0;}
+
+/* Produktrad inom block */
+.ek-prod-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+.ek-prod{display:flex;gap:12px;padding:12px;background:var(--surf2);border:1px solid var(--brd);border-radius:8px;align-items:center;text-decoration:none;color:inherit;transition:all .15s;--brand-c:var(--green);}
+.ek-prod:hover{border-color:var(--green);background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.05);}
+
+/* Varumärkesaccenter — tunn vänsterkant + färgad brand-rad. Subtil men levande. */
+.ek-prod[data-brand="Maurten"]{--brand-c:#1a1a1a;}
+.ek-prod[data-brand="Enervit"]{--brand-c:#C8102E;}
+.ek-prod[data-brand="Umara"]{--brand-c:#4F5A66;}
+.ek-prod[data-brand]{box-shadow:inset 3px 0 0 var(--brand-c);}
+.ek-prod[data-brand] .ek-prod-brand{color:var(--brand-c);}
+.ek-prod[data-brand]:hover{border-color:var(--brand-c);box-shadow:inset 3px 0 0 var(--brand-c),0 4px 14px rgba(0,0,0,.05);}
+.ek-prod[data-brand]:hover .ek-prod-arr,
+.ek-prod[data-brand]:hover .ek-prod-amount{color:var(--brand-c);}
+.ek-prod-img{width:54px;height:54px;flex-shrink:0;background:#fff;border:1px solid var(--brd);border-radius:6px;object-fit:contain;padding:4px;}
+.ek-prod-img.placeholder{background:linear-gradient(135deg,var(--brd) 25%,transparent 25%,transparent 50%,var(--brd) 50%,var(--brd) 75%,transparent 75%);background-size:8px 8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--mut);}
+.ek-prod-info{flex:1;min-width:0;}
+.ek-prod-brand{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:2px;}
+.ek-prod-name{font-family:var(--font);font-weight:700;font-size:14px;line-height:1.3;margin-bottom:3px;color:var(--txt);}
+.ek-prod-meta{font-size:11px;color:var(--mut);line-height:1.4;}
+.ek-prod-amount{font-family:var(--font);font-weight:800;font-size:13px;color:var(--green);text-align:right;flex-shrink:0;padding-left:8px;}
+.ek-prod-arr{color:var(--mut);font-size:14px;flex-shrink:0;padding-left:4px;}
+.ek-prod:hover .ek-prod-arr{color:var(--green);}
+
+/* Disclaimer */
+.ek-disc{margin-top:32px;padding:16px;background:var(--surf2);border:1px solid var(--brd);border-radius:8px;font-size:12px;color:var(--mut);line-height:1.55;}
+.ek-disc strong{color:var(--txt);font-weight:700;}
+
+/* Restart */
+.ek-actions{margin-top:28px;display:flex;gap:10px;flex-wrap:wrap;}
+.btn-restart{background:transparent;color:var(--mut);border:1.5px solid var(--brd);font-family:var(--font);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:13px 24px;border-radius:8px;cursor:pointer;transition:all .15s;}
+.btn-restart:hover{border-color:var(--brd2);color:var(--txt);}
+.btn-share{background:var(--green);color:#fff;border:none;font-family:var(--font);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:13px 24px;border-radius:8px;cursor:pointer;transition:all .15s;}
+.btn-share:hover{background:var(--green-dk);}
+
+/* Källa-text */
+.ek-source{font-size:10px;color:var(--dim);margin-top:24px;text-align:center;letter-spacing:.05em;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Loading-state under beräkning */
+.ek-calc{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;animation:fadeUp .3s;padding:60px 20px;}
+.ek-calc-spinner{width:36px;height:36px;border:2.5px solid var(--brd);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
+.ek-calc-txt{font-size:14px;color:var(--mut);text-align:center;}
+.ek-calc-txt strong{color:var(--txt);font-weight:700;display:block;font-size:18px;margin-bottom:4px;}
+`;
+
+// ─── API-TRANSFORM ──────────────────────────────────────────────────────────
+// Plockar ut energiprodukter ur live-API:et. Filtrerar PRIMÄRT på kategori
+// ("energi"/"sportdryck"/"nutrition") så vi inte missar nya märken som dyker
+// upp i sortimentet. Tar med produkter även om typen inte kan klassificeras
+// (de hamnar då i "övrigt" och visas på during-sektionen som drink_mix-fallback).
+//
+// Hur många som matchar kan loggas i konsolen via DEBUG_API = true nedan.
+// Sätt till true om du vill se en sammanfattning av API-träffen i konsolen
+// (användbart om något ser konstigt ut i produktrekommendationerna).
+const DEBUG_API = false;
+
+function isEnergyDoc(doc) {
+  // Vi gör tre oberoende checks: kategori, märke och produktnamn.
+  // En träff räcker — bredare nät = färre missade produkter.
+
+  // ─ 0) Tillbehör (flaskor, bälten etc) ska aldrig in i poolen, även om
+  //      de råkar ligga i kategorin "Energi & Sportdryck" på sajten ─
+  const docName = (doc.commercialname || doc.itemname || doc.name || "").toLowerCase();
+  if (isAccessory(docName)) return false;
+
+  // ─ 1) Kategori-fält (alla varianter vi sett i Intersports/Loplabbets API) ─
+  // Lägg till fler om du ser fältnamn som missas i debug-utskriften.
+  const catVals = [
+    doc.categories, doc.category, doc.maincategory,
+    doc.itemcategory, doc.itemcategorypaths, doc.itemcategoryname,
+    doc.category_paths, doc.categorypath, doc.categorypaths,
+    doc.categorynames, doc.categoryname,
+    doc.facet_category, doc.facetcategory,
+    doc.productcategory, doc.productcategories,
+    doc.productcategorypath, doc.productcategorypaths,
+    doc.productcategory_str_mv, doc.productcategoryname,
+    doc.urlpath, doc.urlpaths, doc.itemurl, doc.url
+  ];
+  const catBlob = catVals
+    .filter(v => v !== undefined && v !== null && v !== "")
+    .map(v => Array.isArray(v) ? v.join(" ") : (typeof v === "object" ? JSON.stringify(v) : String(v)))
+    .join(" ")
+    .toLowerCase();
+
+  const catKeywords = [
+    "energi", "sportdryck", "sport-dryck", "sports-drink", "sportsdrink",
+    "nutrition", "sportnutrition", "supplement", "kolhydrat",
+    "energi-sportdryck", "energi & sportdryck"
+  ];
+  if (catKeywords.some(k => catBlob.includes(k))) return true;
+
+  // ─ 2) Märke (substring-match, klarar "Enervit AB", "Maurten Group" etc.) ─
+  const brandRaw = (doc.brand || doc.brand_name || doc.brandname ||
+                    doc.manufacturer || doc.itembrand || "").toLowerCase().trim();
+  if (brandRaw && ENERGY_BRANDS.some(b => {
+    const bn = b.toLowerCase();
+    return brandRaw === bn || brandRaw.includes(bn) || bn.includes(brandRaw);
+  })) return true;
+
+  // ─ 3) Produktnamn — om det matchar någon av våra typ-regexar ─
+  // Säkrar oss om ett av våra märken (eller något helt annat) saknar både
+  // brand- och kategoriindikator men namnet uppenbart är en energiprodukt.
+  const name = (doc.commercialname || doc.itemname || doc.name || "").toLowerCase();
+  if (name) {
+    // Tydliga indikator-ord som betyder "det här är en energiprodukt"
+    if (/\b(energigel|energy gel|drink mix|sportdryck|sportsdryck|salttab|salt.?tabletter|electrolyte|elektrolyt|återhämtning|recovery drink|carbo gel|bicarb|bikarbonat|kolhydrat)\b/i.test(name)) {
+      return true;
+    }
+    // Klassificeringsregex i PRODUCT_TYPES
+    if (classifyProduct(name)) return true;
+  }
+
+  return false;
+}
+
+function isInStock(doc) {
+  // API:et kan uttrycka lagerstatus på flera sätt - hantera alla
+  const candidates = [doc.salable, doc.saleable, doc.instock, doc.in_stock, doc.available];
+  // Om INGET fält finns - anta att den är säljbar (hellre falskt positiv än
+  // falskt negativ; tappar man en produkt missar man hela rekommendationen)
+  if (candidates.every(v => v === undefined || v === null)) return true;
+  return candidates.some(v =>
+    v === true || v === 1 || v === "1" || v === "true" || v === "yes"
+  );
+}
+
+function transformAPIResponse(data) {
+  const docs = data?.data?.products?.documents || data?.documents ||
+               data?.hits?.hits?.map(h => h._source) || data?.products || [];
+
+  const seen = new Set();
+  const result = [];
+  let dropped = { notEnergy: 0, dup: 0, noName: 0, noStock: 0, noClass: 0 };
+
+  for (const doc of docs) {
+    if (!isEnergyDoc(doc)) { dropped.notEnergy++; continue; }
+
+    const pNum = doc.productnumber || doc.id || doc.itemnumber;
+    if (!pNum) { dropped.noName++; continue; }
+    if (seen.has(pNum)) { dropped.dup++; continue; }
+
+    if (!isInStock(doc)) { dropped.noStock++; continue; }
+
+    const brand = (doc.brand || doc.brand_name || doc.brandname || "").trim();
+    const name = (doc.commercialname || doc.itemname || doc.name || "").trim();
+    if (!name) { dropped.noName++; continue; }
+
+    const fullName = brand ? `${brand} ${name}`.trim() : name;
+    // Strikt klassificering: om vi inte kan identifiera produkttypen från
+    // namnet så är det förmodligen inte en energiprodukt (även om kategorin
+    // matchade). Detta hindrar t.ex. löparskor som råkar ha "energi" i URL:en
+    // från att klassificeras som drink_mix.
+    const type = classifyProduct(name) || classifyProduct(fullName);
+    if (!type) { dropped.noClass++; continue; }
+    
+    // Visningsnamn: rensa varianter som bara skiljer i storleksbeteckning.
+    // Maurten Bicarb System säljs som 12/15/19/22/25 men det är samma produkt
+    // för kalkylatorns syfte — visa generiskt namn så det inte ser slumpmässigt ut.
+    let displayName = fullName;
+    if (type === "bicarb" && /maurten/i.test(brand)) {
+      displayName = "Maurten Bicarb System";
+    }
+
+    const img = doc.itemimages?.[0] ? `${CDN}/${doc.itemimages[0]}` : null;
+    const url = doc.itemurl
+      ? `${LL}/products/${doc.itemurl}`
+      : `${LL}/varumarken/${doc.brand_urlslug || ''}`;
+    const price = parseFloat(doc.price?.price || doc.price?.regularprice || doc.price || 0);
+
+    seen.add(pNum);
+    result.push({
+      id: pNum,
+      brand: brand || "Övrigt",
+      name: displayName,
+      type,
+      carbs: PRODUCT_TYPES[type]?.typical_carbs ?? null,
+      caf: PRODUCT_TYPES[type]?.typical_caf ?? null,
+      dose: doc.shortdescription || "",
+      price: price || null,
+      url,
+      img,
+      inStock: true,
+    });
+  }
+
+  if (DEBUG_API) {
+    console.log(`[Energikalkylator] API-träff: ${result.length} produkter`, {
+      total_docs: docs.length, dropped, sample_brands: [...new Set(result.map(r => r.brand))]
+    });
+    // Om vi får få träffar — skriv ut första doc:ets fält så vi kan se vad
+    // API:et faktiskt heter de saker vi letar efter.
+    if (result.length < 20 && docs.length > 0) {
+      console.warn("[Energikalkylator] Få träffar — så här ser första API-dokumentet ut. Kolla efter kategori-/märkes-fält som koden inte använder ännu:", docs[0]);
+      console.warn("[Energikalkylator] Tillgängliga toppnivå-fält:", Object.keys(docs[0]).join(", "));
+    }
+  }
+
+  return result;
+}
+
+// ─── KOMPONENTER ────────────────────────────────────────────────────────────
+
+// SVG-ikoner i enhetlig linjestil. 22×22 viewBox, 1.75px stroke, currentColor.
+function Icon({ name, size = 22 }) {
+  const paths = {
+    // Distans
+    lightning: <path d="M13 2L4 13h6l-1 7 9-12h-6l1-6z"/>,
+    runner: (<g>
+      <circle cx="14" cy="4.5" r="2"/>
+      <path d="M5 20l4-7 4-2 1.5-4M9 13l-3-3 4-2M13 11l4 6"/>
+    </g>),
+    target: (<g>
+      <circle cx="11" cy="11" r="8.5"/>
+      <circle cx="11" cy="11" r="5"/>
+      <circle cx="11" cy="11" r="1.5" fill="currentColor"/>
+    </g>),
+    trophy: (<g>
+      <path d="M6 4h10l-.5 7c0 2-2 4-4.5 4s-4.5-2-4.5-4L6 4z"/>
+      <path d="M6 5H3v2c0 2 1.5 3 3 3M16 5h3v2c0 2-1.5 3-3 3"/>
+      <path d="M11 15v3M8 18h6M9 20h4"/>
+    </g>),
+    mountain: <path d="M2 18l6-10 4 5 4-7 4 12H2z"/>,
+    mountains: (<g>
+      <path d="M2 18l5-9 4 5 3-4 6 8H2z"/>
+      <path d="M5 13l2-4 2 4"/>
+    </g>),
+    pencil: (<g>
+      <path d="M4 18v-4L14 4l4 4L8 18H4z"/>
+      <path d="M12 6l4 4"/>
+    </g>),
+    // Stegrubriker
+    flag: <path d="M4 21V3M4 4h13l-3 4 3 4H4"/>,
+    sex_both: (<g>
+      <circle cx="11" cy="9" r="4"/>
+      <path d="M11 13v7M8 17h6"/>
+      <path d="M14 6l4-4M15 2h3v3"/>
+    </g>),
+    ruler: (<g>
+      <path d="M17 5L5 17l-3-3L14 2l3 3z"/>
+      <path d="M11 3l2 2M9 5l2 2M7 7l2 2M5 9l2 2M3 11l2 2"/>
+    </g>),
+    stopwatch: (<g>
+      <path d="M9 2h4M11 2v3"/>
+      <circle cx="11" cy="13" r="7"/>
+      <path d="M11 13V8"/>
+      <path d="M17 6l2 2"/>
+    </g>),
+    bicep: (<g>
+      <path d="M3 12c0-3 3-5 6-3v6L3 18v-6z"/>
+      <path d="M9 9c4-2 6 0 8 1l-1 4c-2 1-5 1-7 1"/>
+    </g>),
+    tag: (<g>
+      <path d="M11 2h9v9l-9 9-9-9 9-9z"/>
+      <circle cx="15" cy="7" r="1.5" fill="currentColor"/>
+    </g>),
+    flask: (<g>
+      <path d="M8 2h6M9 2v6L4 18c-.5 1 .5 2 1.5 2h11c1 0 2-1 1.5-2L13 8V2"/>
+      <path d="M7 13h8"/>
+    </g>),
+    // Kön
+    venus: (<g>
+      <circle cx="11" cy="8" r="4.5"/>
+      <path d="M11 12.5v8M8 17h6"/>
+    </g>),
+    mars: (<g>
+      <circle cx="9" cy="13" r="4.5"/>
+      <path d="M12.5 9.5L19 3M14 3h5v5"/>
+    </g>),
+    // Erfarenhet
+    sprout: (<g>
+      <path d="M11 20v-9"/>
+      <path d="M11 13c-3-1-5-3-5-7 4 0 6 2 6 6"/>
+      <path d="M11 11c3-1 6-3 6-7-4 0-6 2-7 5"/>
+    </g>),
+    leaf: (<g>
+      <path d="M4 19c0-9 6-15 15-15-1 9-6 15-15 15z"/>
+      <path d="M4 19L15 8"/>
+    </g>),
+    tree: (<g>
+      <path d="M11 20v-5"/>
+      <path d="M5 15l3-5h-2l5-7 5 7h-2l3 5H5z"/>
+    </g>),
+    // Brand
+    globe: (<g>
+      <circle cx="11" cy="11" r="9"/>
+      <ellipse cx="11" cy="11" rx="4" ry="9"/>
+      <path d="M2 11h18"/>
+    </g>),
+    drop: (<g>
+      <path d="M11 2c4 5 7 8 7 12a7 7 0 11-14 0c0-4 3-7 7-12z"/>
+      <path d="M8 14a3 3 0 003 3"/>
+    </g>),
+    hexagon: (<g>
+      <path d="M11 2l8 5v8l-8 5-8-5V7l8-5z"/>
+      <circle cx="11" cy="11" r="2.5" fill="currentColor"/>
+      <circle cx="11" cy="3" r="1" fill="currentColor"/>
+      <circle cx="19" cy="15" r="1" fill="currentColor"/>
+      <circle cx="3" cy="15" r="1" fill="currentColor"/>
+    </g>),
+    gel: (<g>
+      <path d="M7 3h8v3l3 13c0 .5-.3 1-1 1H4c-.7 0-1-.5-1-1l3-13V3z"/>
+      <path d="M7 6h8"/>
+    </g>),
+    blend: (<g>
+      <circle cx="8" cy="8" r="5"/>
+      <circle cx="14" cy="8" r="5"/>
+      <circle cx="11" cy="14" r="5"/>
+    </g>),
+    // Boosters
+    beetroot: (<g>
+      <path d="M11 20c-5-1-7-5-6-9 1-2 4-3 6-2 2-1 5 0 6 2 1 4-1 8-6 9z"/>
+      <path d="M11 9V4M9 5c1-1 3-1 4 1M11 4c-1-2 1-3 2-2"/>
+    </g>),
+    broccoli: (<g>
+      <circle cx="11" cy="6" r="3"/>
+      <circle cx="6" cy="9" r="2.5"/>
+      <circle cx="16" cy="9" r="2.5"/>
+      <path d="M7 11l1 4M15 11l-1 4M11 9v9M8 18h6"/>
+    </g>),
+    erlenmeyer: (<g>
+      <path d="M8 2h6M9 2v5L4 17c-.5 1.5.5 3 2 3h10c1.5 0 2.5-1.5 2-3L13 7V2"/>
+      <path d="M6 13c2-1 4 1 6 0s4 1 5 0"/>
+    </g>),
+    // Övrigt
+    warning: (<g>
+      <path d="M11 3l9 16H2L11 3z"/>
+      <path d="M11 9v4"/>
+      <circle cx="11" cy="16" r=".8" fill="currentColor"/>
+    </g>),
+    bottle: (<g>
+      <path d="M9 2h4v3l1 2v11c0 1-.5 2-2 2H9c-1.5 0-2-1-2-2V7l1-2V2z"/>
+      <path d="M7 11h7"/>
+    </g>),
+    check: <path d="M4 11l4 4 10-10"/>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 22 22" 
+         fill="none" stroke="currentColor" strokeWidth="1.75"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {paths[name] || null}
+    </svg>
+  );
+}
+
+function ProductCard({ product, amount, note }) {
+  if (!product) return null;
+  return (
+    <a className="ek-prod" data-brand={product.brand} href={product.url} target="_blank" rel="noopener noreferrer">
+      {product.img ? (
+        <img className="ek-prod-img" src={product.img} alt={product.name} 
+             loading="lazy" decoding="async"
+             onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} />
+      ) : null}
+      <div className="ek-prod-img placeholder" style={{display: product.img ? "none" : "flex"}}>
+        <Icon name="bottle" size={24}/>
+      </div>
+      <div className="ek-prod-info">
+        <div className="ek-prod-brand">{product.brand}</div>
+        <div className="ek-prod-name">{product.name.replace(product.brand, "").trim() || product.name}</div>
+        <div className="ek-prod-meta">{note || product.dose || `${product.carbs || 0}g kolhydrater`}</div>
+      </div>
+      {amount && <div className="ek-prod-amount">{amount}</div>}
+      <div className="ek-prod-arr">→</div>
+    </a>
+  );
+}
+
+// ─── HUVUDKOMPONENTEN ───────────────────────────────────────────────────────
+// När användaren väljer kön fyller vi i rimliga default-värden för vikt,
+// längd och ålder så att stepper-pilarna har något att räkna upp/ned från.
+// Värdena är ungefärliga svenska medelvärden för aktiva motionärer.
+// Användaren kan alltid skriva över dem manuellt.
+const SEX_DEFAULTS = {
+  man:    { weight: 70, height: 178, age: 35 },
+  kvinna: { weight: 60, height: 167, age: 35 },
+};
+
+function EnergiKalkylator() {
+  const [phase, setPhase] = useState("intro");      // intro | quiz | calc | result
+  const [step, setStep] = useState(0);
+  const [ans, setAns] = useState({
+    distance: null,
+    customDistance: "",
+    sex: null,
+    weight: "", height: "", age: "",
+    timeH: "", timeM: "", timeS: "",
+    experience: null,
+    brand: null,
+    boosters: [],
+  });
+  // Initial state: kuraterad fallback-lista. Ersätts av produkter.json
+  // i useEffect så fort den hunnit laddas (oftast några ms eftersom det är
+  // en statisk fil i samma origin).
+  const [products, setProducts] = useState(() => FALLBACK_PRODUCTS.map(applyUrlOverride));
+  const [dataState, setDataState] = useState("loading"); // loading | live | fallback
+  
+  // Hämta produkter från statisk JSON i bakgrunden.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(PRODUCTS_JSON_URL, { cache: "default" })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(data => {
+        if (cancelled) return;
+        const live = Array.isArray(data) ? data : (data.products || []);
+        if (live.length >= 3) {
+          // Mergea: använd live-data för det den har, behåll fallback för
+          // produkttyper som inte finns i live (t.ex. Nomio-shoten om den
+          // tillfälligt skulle saknas i feeden).
+          const merged = [...live, ...FALLBACK_PRODUCTS.filter(f => 
+            !live.some(l => l.brand === f.brand && l.type === f.type)
+          )];
+          setProducts(merged.map(applyUrlOverride));
+          setDataState("live");
+          if (DEBUG_API) {
+            console.log(`[Energikalkylator] Laddade ${live.length} produkter från ${PRODUCTS_JSON_URL}` +
+                        (data.updated ? ` (uppdaterad ${data.updated})` : ""));
+          }
+        } else {
+          setDataState("fallback");
+          console.warn(`[Energikalkylator] produkter.json gav för få träffar (${live.length}), använder fallback.`);
+        }
+      })
+      .catch(e => {
+        if (cancelled) return;
+        console.warn("[Energikalkylator] Kunde inte ladda produkter.json, använder fallback:", e.message);
+        setDataState("fallback");
+      });
+    return () => { cancelled = true; };
+  }, []);
+  
+  const cur = STEPS[step];
+  const prog = phase === "result" ? 100 : phase === "intro" ? 0 : ((step + 1) / STEPS.length) * 100;
+  
+  const setVal = (key, val) => setAns(p => ({ ...p, [key]: val }));
+  const toggleBooster = (b) => setAns(p => ({
+    ...p, boosters: p.boosters.includes(b) ? p.boosters.filter(x => x !== b) : [...p.boosters, b]
+  }));
+  
+  // Validera nuvarande steg
+  const canNext = useMemo(() => {
+    if (!cur) return false;
+    switch (cur.id) {
+      case "distance": return ans.distance !== null && (ans.distance > 0 || (parseFloat(ans.customDistance) > 0));
+      case "sex": return ans.sex !== null;
+      case "metrics": return parseInt(ans.weight) >= 30 && parseInt(ans.height) >= 100 && parseInt(ans.age) >= 10;
+      case "time": {
+        const total = (parseInt(ans.timeH) || 0) * 60 + (parseInt(ans.timeM) || 0) + (parseInt(ans.timeS) || 0) / 60;
+        return total >= 10;
+      }
+      case "experience": return ans.experience !== null;
+      case "brand": return ans.brand !== null;
+      case "boosters": return true; // alltid valbar
+      default: return false;
+    }
+  }, [cur, ans]);
+  
+  const goNext = () => {
+    if (step < STEPS.length - 1) setStep(s => s + 1);
+    else {
+      setPhase("calc");
+      setTimeout(() => setPhase("result"), 1100);
+    }
+  };
+  const goBack = () => {
+    if (step > 0) setStep(s => s - 1);
+    else setPhase("intro");
+  };
+  const restart = () => { setPhase("intro"); setStep(0); setAns({
+    distance: null, customDistance: "",
+    sex: null, weight: "", height: "", age: "",
+    timeH: "", timeM: "", timeS: "",
+    experience: null, brand: null, boosters: [],
+  }); };
+  
+  // Bygg input för calc om vi är på resultatsidan
+  const plan = useMemo(() => {
+    if (phase !== "result") return null;
+    const distance = ans.distance > 0 ? ans.distance : parseFloat(ans.customDistance);
+    const timeMin = (parseInt(ans.timeH) || 0) * 60 + (parseInt(ans.timeM) || 0) + (parseInt(ans.timeS) || 0) / 60;
+    return calculatePlan({
+      sex: ans.sex,
+      age: parseInt(ans.age),
+      weight: parseInt(ans.weight),
+      height: parseInt(ans.height),
+      distance, timeMin,
+      experience: ans.experience,
+      brand: ans.brand,
+      boosters: ans.boosters,
+    });
+  }, [phase, ans]);
+  
+  const recs = useMemo(() => plan ? suggestProducts(plan, products) : null, [plan, products]);
+  
+  // Pace-formattering live medan användaren skriver tid
+  const livePace = useMemo(() => {
+    const distance = ans.distance > 0 ? ans.distance : parseFloat(ans.customDistance);
+    const totalMin = (parseInt(ans.timeH) || 0) * 60 + (parseInt(ans.timeM) || 0) + (parseInt(ans.timeS) || 0) / 60;
+    if (!distance || distance <= 0 || totalMin < 5) return null;
+    const pace = totalMin / distance;
+    const m = Math.floor(pace);
+    const s = Math.round((pace - m) * 60);
+    return `${m}:${s.toString().padStart(2, "0")}/km`;
+  }, [ans.distance, ans.customDistance, ans.timeH, ans.timeM, ans.timeS]);
+  
+  // ── RENDER ──
+  return (
+    <>
+      <style>{css}</style>
+      <div className="ek">
+        <div className="ek-wrap">
+          
+          {/* HEADER */}
+          <div className="ek-head">
+            <div className="ek-head-l">
+              <img className="ek-logo" 
+                   src="https://www.loplabbet.se/globalassets/loplabbet/loggos/loplabbet-logo_new.png" 
+                   alt="Löplabbet"
+                   onError={(e)=>{e.target.style.display='none';}} />
+              <span className="ek-tag">Energikalkylator</span>
+            </div>
+            {phase === "quiz" && <span className="ek-step-counter">Steg {step + 1} / {STEPS.length}</span>}
+          </div>
+          
+          {/* PROGRESS */}
+          {phase !== "intro" && (
+            <div className="ek-prog"><div className="ek-prog-fill" style={{ width: `${prog}%` }}/></div>
+          )}
+          
+          {/* INTRO */}
+          {phase === "intro" && (
+            <div className="ek-intro">
+              <div className="eye">Personlig nutrition</div>
+              <h1 className="ek-h1">Hitta din<br/><em>perfekta</em><br/>energiplan</h1>
+              <p className="ek-intro-body">
+                Få en konkret plan för <strong>innan, under och efter</strong> ditt lopp, 
+                anpassad efter din kropp, din erfarenhet och vilka produkter du gillar 
+                från <strong>Umara, Maurten och Enervit</strong>.
+              </p>
+              <div className="ek-bullets">
+                <div className="ek-bullet"><div className="ek-bullet-dot"/>Räknar exakt energi­förbrukning baserat på din kropp och loppets längd</div>
+                <div className="ek-bullet"><div className="ek-bullet-dot"/>Ger en konkret produktrekommendation från Löplabbets sortiment</div>
+                <div className="ek-bullet"><div className="ek-bullet-dot"/>Tipsar om boosters som rödbetsshot och bikarbonat när det passar</div>
+              </div>
+              <button className="ek-cta" 
+                      disabled={dataState === "loading"} 
+                      onClick={() => { setPhase("quiz"); setStep(0); }}>
+                {dataState === "loading" ? "Laddar sortimentet…" : "Starta kalkylatorn"} 
+                {dataState !== "loading" && <span className="arr">→</span>}
+              </button>
+              <div className="ek-loadnote">
+                {dataState === "loading" && (<>
+                  <div className="ek-mini-spinner"/> Hämtar dagens energiprodukter…
+                </>)}
+                {dataState === "live" && (<>
+                  <span className="ek-mini-check">✓</span> Sortimentet uppdaterat
+                </>)}
+              </div>
+            </div>
+          )}
+          
+          {/* QUIZ-STEG */}
+          {phase === "quiz" && (
+            <div className="ek-step">
+              <span className="ek-q-ico"><Icon name={cur.icon}/></span>
+              <h2 className="ek-q-h">
+                {cur.id === "time"
+                  ? `Vad siktar du på för tid på ${getDistanceName(ans)}?`
+                  : cur.q}
+              </h2>
+              <p className="ek-q-sub">{cur.sub}</p>
+              
+              {/* DISTANS */}
+              {cur.id === "distance" && (
+                <>
+                  <div className="ek-opts">
+                    {DISTANCES.map(d => (
+                      <button key={d.id} 
+                              className={`ek-opt ${ans.distance === d.id ? "sel" : ""}`}
+                              onClick={() => setVal("distance", d.id)}>
+                        <span className="ek-opt-ico"><Icon name={d.icon}/></span>
+                        <div className="ek-opt-txt">
+                          <div className="ek-opt-lbl">{d.label}</div>
+                          <div className="ek-opt-dsc">{d.desc}</div>
+                        </div>
+                        <div className="ek-chk"><div className="ek-dot"/></div>
+                      </button>
+                    ))}
+                  </div>
+                  {ans.distance === -1 && (
+                    <div className="ek-input-wrap" style={{marginTop: 14}}>
+                      <input className="ek-input" type="number" min="2" max="500" step="0.1"
+                             placeholder="Ange distans"
+                             value={ans.customDistance}
+                             onChange={e => setVal("customDistance", e.target.value)} />
+                      <span className="ek-input-suffix">km</span>
+                    </div>
+                  )}
+                </>
+              )}
+              
+              {/* KÖN */}
+              {cur.id === "sex" && (
+                <div className="ek-opts">
+                  {[
+                    { id: "kvinna", label: "Kvinna", desc: "Kvinnokroppen oxiderar mer fett vid samma intensitet" },
+                    { id: "man", label: "Man", desc: "Använder förhållandevis mer kolhydrater vid given intensitet" },
+                  ].map(o => (
+                    <button key={o.id} 
+                            className={`ek-opt ${ans.sex === o.id ? "sel" : ""}`}
+                            onClick={() => setAns(p => {
+                              const def = SEX_DEFAULTS[o.id] || SEX_DEFAULTS.man;
+                              // En siffra räknas som "default" (= inte användarens egen)
+                              // om den matchar någon av de kön-anpassade defaults i tabellen.
+                              // Då ska den uppdateras vid kön-byte. Om värdet är tomt eller
+                              // matchar inget default ska det också ersättas/sättas.
+                              // Om användaren skrivit en egen siffra (t.ex. 75 kg) bevaras den.
+                              const isDef = (key, val) => {
+                                if (val === "" || val == null) return true;
+                                const n = parseFloat(val);
+                                return Object.values(SEX_DEFAULTS).some(d => d[key] === n);
+                              };
+                              return {
+                                ...p,
+                                sex: o.id,
+                                weight: isDef("weight", p.weight) ? def.weight : p.weight,
+                                height: isDef("height", p.height) ? def.height : p.height,
+                                age:    isDef("age",    p.age)    ? def.age    : p.age,
+                              };
+                            })}>
+                      <span className="ek-opt-ico"><Icon name={o.id === "kvinna" ? "venus" : "mars"}/></span>
+                      <div className="ek-opt-txt">
+                        <div className="ek-opt-lbl">{o.label}</div>
+                        <div className="ek-opt-dsc">{o.desc}</div>
+                      </div>
+                      <div className="ek-chk"><div className="ek-dot"/></div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {/* METRICS */}
+              {cur.id === "metrics" && (() => {
+                // Defaultvärden anpassade efter valt kön. Används både som
+                // placeholder (synlig hint i tomt fält) och som start-värde
+                // när användaren börjar trycka pil-upp/ner i ett tomt fält.
+                const defaults = ans.sex === "kvinna"
+                  ? { weight: 60, height: 167, age: 35 }
+                  : { weight: 75, height: 180, age: 35 };
+                
+                // Pil-upp/ner i ett tomt fält ska räkna från default, inte 0.
+                // Vi lyssnar på keydown och stoppar webbläsarens egna stepp
+                // om värdet är tomt — sätter istället defaultvärdet.
+                const stepFromDefault = (key, val, def, setter) => (e) => {
+                  if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                    if (!val || val === "") {
+                      e.preventDefault();
+                      setter(String(def));
+                    }
+                  }
+                };
+                
+                return (
+                <div className="ek-grid" style={{gridTemplateColumns:"1fr 1fr 1fr"}}>
+                  <div className="ek-field">
+                    <label className="ek-field-lbl">Vikt</label>
+                    <div className="ek-input-wrap">
+                      <input className="ek-input" type="number" min="30" max="200" 
+                             placeholder={String(defaults.weight)}
+                             value={ans.weight} 
+                             onChange={e => setVal("weight", e.target.value)}
+                             onKeyDown={stepFromDefault("weight", ans.weight, defaults.weight, v => setVal("weight", v))} />
+                      <span className="ek-input-suffix">kg</span>
+                    </div>
+                  </div>
+                  <div className="ek-field">
+                    <label className="ek-field-lbl">Längd</label>
+                    <div className="ek-input-wrap">
+                      <input className="ek-input" type="number" min="100" max="220" 
+                             placeholder={String(defaults.height)}
+                             value={ans.height} 
+                             onChange={e => setVal("height", e.target.value)}
+                             onKeyDown={stepFromDefault("height", ans.height, defaults.height, v => setVal("height", v))} />
+                      <span className="ek-input-suffix">cm</span>
+                    </div>
+                  </div>
+                  <div className="ek-field">
+                    <label className="ek-field-lbl">Ålder</label>
+                    <div className="ek-input-wrap">
+                      <input className="ek-input" type="number" min="10" max="100" 
+                             placeholder={String(defaults.age)}
+                             value={ans.age} 
+                             onChange={e => setVal("age", e.target.value)}
+                             onKeyDown={stepFromDefault("age", ans.age, defaults.age, v => setVal("age", v))} />
+                      <span className="ek-input-suffix">år</span>
+                    </div>
+                  </div>
+                </div>
+                );
+              })()}
+              
+              {/* TID */}
+              {cur.id === "time" && (
+                <>
+                  <div className="ek-time">
+                    <input className="ek-time-input" type="number" min="0" max="48" placeholder="0"
+                           value={ans.timeH} onChange={e => setVal("timeH", e.target.value)} />
+                    <span className="ek-time-sep">:</span>
+                    <input className="ek-time-input" type="number" min="0" max="59" placeholder="00"
+                           value={ans.timeM} onChange={e => setVal("timeM", e.target.value)} />
+                    <span className="ek-time-sep">:</span>
+                    <input className="ek-time-input" type="number" min="0" max="59" placeholder="00"
+                           value={ans.timeS} onChange={e => setVal("timeS", e.target.value)} />
+                  </div>
+                  <div className="ek-time-meta">
+                    <span>Timmar : Minuter : Sekunder</span>
+                    {livePace && <span><strong>Snittfart {livePace}</strong></span>}
+                  </div>
+                </>
+              )}
+              
+              {/* EXPERIENCE */}
+              {cur.id === "experience" && (
+                <div className="ek-opts">
+                  {[
+                    { id: "nyborjare", label: "Nybörjare", desc: "Sällan eller aldrig ätit gels under löpning" },
+                    { id: "medel", label: "Lite vana", desc: "Använder gels och dryck men inte regelbundet på alla pass" },
+                    { id: "avancerad", label: "Mycket vana", desc: "Tränar systematiskt med kolhydratintag, har stark mage" },
+                  ].map(o => (
+                    <button key={o.id} 
+                            className={`ek-opt ${ans.experience === o.id ? "sel" : ""}`}
+                            onClick={() => setVal("experience", o.id)}>
+                      <span className="ek-opt-ico"><Icon name={o.id === "nyborjare" ? "sprout" : o.id === "medel" ? "leaf" : "tree"}/></span>
+                      <div className="ek-opt-txt">
+                        <div className="ek-opt-lbl">{o.label}</div>
+                        <div className="ek-opt-dsc">{o.desc}</div>
+                      </div>
+                      <div className="ek-chk"><div className="ek-dot"/></div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {/* BRAND */}
+              {cur.id === "brand" && (
+                <div className="ek-opts">
+                  {[
+                    { id: "alla", label: "Visa alla", icon: "globe",
+                      desc: "Ingen preferens. Vi väljer den bästa produkten för varje moment, oavsett märke. Till exempel Maurten Drink Mix att ladda med, Umara U Gel under, Enervit R2 efter. Bra för dig som inte är låst vid ett märke." },
+                    { id: "umara", label: "Umara", icon: "drop",
+                      desc: "Svenskt familjeföretag grundat av läkare och näringsfysiologer. Utvecklar produkter med fokus på smak, magtålighet och rena ingredienser. U Sport är en flexibel sportdryck där du själv doserar koncentrationen, U Gel är mjuk och icke-klibbig, U Bar är gjord på riktig mat. Bra för dig som vill ha kontroll över doseringen och föredrar svensktillverkat." },
+                    { id: "maurten", label: "Maurten", icon: "hexagon",
+                      desc: "Göteborgsföretag som revolutionerat sportnutritionen med patenterad hydrogelteknik. Kolhydraterna kapslas in i en gel av alginat och pektin som först aktiveras i magsäcken. Det gör det möjligt att ta upp till 100-120 g kolhydrater per timme utan magbesvär. Används av Eliud Kipchoge och flertalet marathonelitlöpare. Bra för dig som vill ladda mycket kolhydrater eller har känslig mage." },
+                    { id: "enervit", label: "Enervit", icon: "gel",
+                      desc: "Italiensk sportnutritionspionjär sedan 1980-talet med stark vetenskaplig bas. Brett sortiment där varje produkt har en specifik roll: Pre Sport-drycken med Branched Cyclic Carbs (BCC) inför start, Sport Gel under loppet, R2 Recovery efteråt. Officiell partner till italienska OS-truppen och flera Tour de France-stall. Bra för dig som vill ha hela kedjan från ett märke." },
+                  ].map(o => {
+                    const brandKey = o.id === "maurten" ? "Maurten" 
+                                   : o.id === "enervit" ? "Enervit" 
+                                   : o.id === "umara" ? "Umara" : null;
+                    return (
+                    <button key={o.id} 
+                            data-brand={brandKey || undefined}
+                            className={`ek-opt ${ans.brand === o.id ? "sel" : ""}`}
+                            onClick={() => setVal("brand", o.id)}>
+                      <span className="ek-opt-ico"><Icon name={o.icon}/></span>
+                      <div className="ek-opt-txt">
+                        <div className="ek-opt-lbl">{o.label}</div>
+                        <div className="ek-opt-dsc">{o.desc}</div>
+                      </div>
+                      <div className="ek-chk"><div className="ek-dot"/></div>
+                    </button>
+                  );})}
+                </div>
+              )}
+              
+              {/* BOOSTERS */}
+              {cur.id === "boosters" && (
+                <>
+                <div className="ek-opts">
+                  <button className={`ek-opt multi ${ans.boosters.includes("beetroot") ? "sel" : ""}`}
+                          onClick={() => toggleBooster("beetroot")}>
+                    <span className="ek-opt-ico"><Icon name="beetroot"/></span>
+                    <div className="ek-opt-txt">
+                      <div className="ek-opt-lbl">Rödbetsshot</div>
+                      <div className="ek-opt-dsc">Nitrat förbättrar löpekonomin med 1-3%. Bra för 5K upp till maraton. Vi väljer märke baserat på lager.</div>
+                    </div>
+                    <div className="ek-chk"><div className="ek-dot"/></div>
+                  </button>
+                  <button className={`ek-opt multi ${ans.boosters.includes("nomio") ? "sel" : ""}`}
+                          onClick={() => toggleBooster("nomio")}>
+                    <span className="ek-opt-ico"><Icon name="broccoli"/></span>
+                    <div className="ek-opt-txt">
+                      <div className="ek-opt-lbl">Nomio prestationsshot</div>
+                      <div className="ek-opt-dsc">Svensk shot från broccoligroddar (ITC). Minskar mjölksyra och oxidativ stress. Tas 2-3h före start.</div>
+                    </div>
+                    <div className="ek-chk"><div className="ek-dot"/></div>
+                  </button>
+                  <button className={`ek-opt multi ${ans.boosters.includes("bicarb") ? "sel" : ""} ${ans.experience === "nyborjare" ? "ek-opt-dim" : ""}`}
+                          onClick={() => ans.experience !== "nyborjare" && toggleBooster("bicarb")}>
+                    <span className="ek-opt-ico"><Icon name="erlenmeyer"/></span>
+                    <div className="ek-opt-txt">
+                      <div className="ek-opt-lbl">Bikarbonat</div>
+                      <div className="ek-opt-dsc">Buffrar laktat. Bäst för korta-medellånga lopp och elitsatsningar.</div>
+                      {ans.experience === "nyborjare" && <div className="ek-opt-warn"><Icon name="warning" size={13}/> Kräver vana, skip om magen inte är intränad</div>}
+                    </div>
+                    <div className="ek-chk"><div className="ek-dot"/></div>
+                  </button>
+                </div>
+                <p style={{fontSize:12,color:"var(--dim)",marginTop:14,lineHeight:1.5}}>
+                  Vill du köra utan boosters? Hoppa direkt till <strong style={{color:"var(--mut)"}}>Räkna ut planen</strong> nedan.
+                </p>
+                </>
+              )}
+              
+              <div className="ek-nav">
+                <button className="btn btn-back" onClick={goBack}>← Tillbaka</button>
+                <button className="btn btn-next" disabled={!canNext} onClick={goNext}>
+                  {step === STEPS.length - 1 ? "Räkna ut planen" : "Nästa →"}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* CALC LOADING */}
+          {phase === "calc" && (
+            <div className="ek-calc">
+              <div className="ek-calc-spinner"/>
+              <div className="ek-calc-txt">
+                <strong>Bygger din energiplan</strong>
+                Räknar förbrukning, kolhydrater och produktförslag…
+              </div>
+            </div>
+          )}
+          
+          {/* RESULTAT */}
+          {phase === "result" && plan && recs && (
+            <div className="ek-result">
+              <div className="ek-result-eye">Din personliga plan</div>
+              <h1 className="ek-result-h">
+                {plan.distance} km på<br/>
+                <em>{Math.floor(plan.timeMin / 60)}h {Math.round(plan.timeMin % 60)}min</em>
+              </h1>
+              <p className="ek-result-sub">
+                För dig (<strong>{plan.weight} kg, {plan.sex}</strong>) i fart <strong>{Math.floor(plan.pace_min_per_km)}:{Math.round((plan.pace_min_per_km % 1) * 60).toString().padStart(2,"0")}/km</strong>. 
+                Det här är vad din kropp behöver, och hur du fyller på det smart med produkter från Löplabbet.
+              </p>
+              
+              {/* STATS */}
+              <div className="ek-stats">
+                <div className="ek-stat accent">
+                  <div className="ek-stat-lbl">Energi totalt</div>
+                  <div className="ek-stat-val">{plan.totalKcal}<span className="unit">kcal</span></div>
+                </div>
+                <div className="ek-stat">
+                  <div className="ek-stat-lbl">Kolhydrater</div>
+                  <div className="ek-stat-val">{plan.carbGrams}<span className="unit">g</span></div>
+                </div>
+                <div className="ek-stat">
+                  <div className="ek-stat-lbl">Mål per timme</div>
+                  <div className="ek-stat-val">{plan.carbsHr}<span className="unit">g/h</span></div>
+                </div>
+                <div className="ek-stat">
+                  <div className="ek-stat-lbl">Vätska / timme</div>
+                  <div className="ek-stat-val">{plan.fluidHr}<span className="unit">ml</span></div>
+                </div>
+              </div>
+              
+              {/* Pedagogisk inforuta — varför intaget kan vara lägre än totalförbrukning */}
+              <div className="ek-insight">
+                <Icon name="lightning" size={20}/>
+                <div className="ek-insight-body">
+                  Du har redan ca <strong>{plan.glycogenStores} g glykogen</strong> lagrat i muskler och lever, det räcker långt på egen hand.
+                  Intaget på <strong>{plan.carbsHr} g/h</strong> är vad du behöver fylla på <em>utöver</em> dina egna depåer för att hålla farten hela vägen.
+                </div>
+              </div>
+              
+              {/* INNAN */}
+              <section className="ek-section">
+                <div className="ek-section-head">
+                  <span className="ek-section-num before">01</span>
+                  <h2 className="ek-section-title">Innan loppet</h2>
+                </div>
+                <p className="ek-section-sub">Förberedelser dagarna och timmarna före start.</p>
+                {recs.beforePlan.map((b, i) => (
+                  <div className="ek-block" key={i}>
+                    <div className="ek-block-timing">{b.timing}</div>
+                    <h3 className="ek-block-h">{b.heading}</h3>
+                    <p className="ek-block-detail">{b.detail}</p>
+                    {b.product && (
+                      <div className="ek-prod-list">
+                        <ProductCard product={b.product} note={b.product.dose}/>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
+              
+              {/* UNDER */}
+              <section className="ek-section">
+                <div className="ek-section-head">
+                  <span className="ek-section-num during">02</span>
+                  <h2 className="ek-section-title">Under loppet</h2>
+                </div>
+                <p className="ek-section-sub">Konkret upplägg av dryck, gel och bars.</p>
+                {recs.duringPlan.map((d, i) => (
+                  <div className="ek-block ek-block-during" key={i}>
+                    <div className="ek-block-timing">Strategi</div>
+                    <h3 className="ek-block-h">{d.heading}</h3>
+                    <p className="ek-block-detail">{d.detail}</p>
+                    {d.products && d.products.length > 0 && (
+                      <div className="ek-prod-list">
+                        {d.products.map((p, j) => (
+                          <ProductCard key={j} product={p.product} amount={p.amount} note={p.note}/>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
+              
+              {/* EFTER */}
+              <section className="ek-section">
+                <div className="ek-section-head">
+                  <span className="ek-section-num after">03</span>
+                  <h2 className="ek-section-title">Efter loppet</h2>
+                </div>
+                <p className="ek-section-sub">Återhämtning för att maximera anpassning till nästa pass.</p>
+                {recs.afterPlan.map((a, i) => (
+                  <div className="ek-block ek-block-after" key={i}>
+                    <div className="ek-block-timing">{a.timing}</div>
+                    <h3 className="ek-block-h">{a.heading}</h3>
+                    <p className="ek-block-detail">{a.detail}</p>
+                    {a.product && (
+                      <div className="ek-prod-list">
+                        <ProductCard product={a.product} note={`${plan.recCarbs}g kolhydrater + ${plan.recProt}g protein`}/>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
+              
+              {/* DISCLAIMER */}
+              <div className="ek-disc">
+                <strong>Tänk på:</strong> Det här är teoretiska beräkningar baserade på etablerad sportnutritions­forskning 
+                (Cunninghams formel, ACSM-data, Jeukendrup). Individuella skillnader är stora, testa upplägget på 
+                träningspass innan tävlingsdagen. Frågor? Prata med personalen i butik!
+              </div>
+              
+              {/* ACTIONS */}
+              <div className="ek-actions">
+                <button className="btn-restart" onClick={restart}>↺ Räkna om</button>
+                <a className="btn-share" href="https://www.loplabbet.se/lopning/tillbehor/energi-sportdryck?in_stock=true" target="_blank" rel="noopener">Se hela sortimentet</a>
+              </div>
+              
+              <div className="ek-source">
+                {dataState === "live" 
+                  ? `Sortiment via loplabbet.se • ${products.length} produkter` 
+                  : ""}
+              </div>
+            </div>
+          )}
+          
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── HÖJDRAPPORTERING TILL PARENT-FÖNSTRET ──────────────────────────────────
+// När den här sidan bäddas in som iframe (t.ex. i ett HTML-block i EpiServer)
+// vill vi att iframen ska följa innehållets höjd. Annars får man antingen
+// onödigt vit yta eller scrollbar-i-scrollbar.
+// Skickar nuvarande höjd via postMessage varje gång innehållet ändrar storlek.
+if (window.parent !== window) {
+  let lastHeight = 0;
+  const reportHeight = () => {
+    const h = document.documentElement.scrollHeight;
+    if (Math.abs(h - lastHeight) > 2) {
+      lastHeight = h;
+      window.parent.postMessage({ type: "energikalkylator:resize", height: h }, "*");
+    }
+  };
+  // ResizeObserver fångar upp när React renderar om — t.ex. när användaren
+  // klickar sig genom quizen eller resultatet expanderar.
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(reportHeight).observe(document.documentElement);
+  }
+  // Backup: kör vid load + var 500ms i 5s ifall ResizeObserver missar något
+  window.addEventListener("load", reportHeight);
+  let n = 0;
+  const ivl = setInterval(() => { reportHeight(); if (++n >= 10) clearInterval(ivl); }, 500);
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(EnergiKalkylator));
+  </script>
+</body>
+</html>
