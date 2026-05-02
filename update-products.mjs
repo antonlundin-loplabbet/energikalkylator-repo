@@ -141,16 +141,26 @@ function transformAPIResponse(data) {
     const url = doc.url || doc.itemurl || (pNum ? `https://www.loplabbet.se/products/${pNum}/01` : "");
     
     // CDN-bilder. Försök i ordning:
-    //  1. Direkta fältnamn från API:et (om de finns)
+    //  1. Direkta fältnamn från API:et — letar brett eftersom Intersport
+    //     använder olika fältnamn för olika produkttyper
     //  2. Bygg från långt produktnummer + variant. CDN-mönstret är
-    //     <12-siffrigt-id>_10.jpg där id = produktnummer + 5 siffror för
-    //     färg/variant + "000". Default-färgen är 01, så exempel:
-    //     produktnummer 1481899 → CDN-id 148189901000 → bild .../148189901000_10.jpg
-    let img = doc.image || doc.imageurl || doc.image_url || doc.thumbnail || doc.imgurl || "";
+    //     <12-siffrigt-id>_<NN>.jpg. Default är "01000_10" men vissa
+    //     produkter använder "_00" eller andra suffix — då hjälper det
+    //     bara att läsa fältet direkt från API:et.
+    let img = doc.image || doc.imageurl || doc.image_url || doc.thumbnail || 
+              doc.imgurl || doc.imageurls || doc.images || doc.mediaurl || 
+              doc.mediaurls || doc.picture || doc.itemimage || doc.itemimageurl || "";
+    // Om värdet är en array (t.ex. ["url1", "url2"]) — ta första
+    if (Array.isArray(img)) img = img[0] || "";
+    // Om värdet är ett objekt med {url: "..."} — extrahera
+    if (typeof img === "object" && img !== null) img = img.url || img.src || "";
+    // Relativa URL:er → absolut
+    if (typeof img === "string" && img.startsWith("/")) {
+      img = `https://cdn.intersport.se${img}`;
+    }
+    // Sista fallback: bygg från produktnummer (kan vara fel suffix för vissa)
     if (!img && pNum) {
       const pStr = String(pNum);
-      // Om produktnumret redan är 12 siffror, använd som det är.
-      // Annars: lägg på "01000" för default-färg.
       const cdnId = pStr.length >= 12 ? pStr : `${pStr}01000`;
       img = `https://cdn.intersport.se/productimages/690x600/${cdnId}_10.jpg`;
     }
@@ -184,6 +194,23 @@ async function main() {
     process.exit(1);
   }
   const data = await res.json();
+  
+  // DEBUG: skriv ut bildrelaterade fält från första energi-produkten
+  // så vi ser vilket fält som faktiskt har bild-URL:n.
+  const docs = data?.data?.products?.documents || data?.documents || data?.products || [];
+  const sampleEnergyDoc = docs.find(d => isEnergyDoc(d));
+  if (sampleEnergyDoc) {
+    console.log("\n=== DEBUG: alla fält i första energiprodukten ===");
+    console.log(JSON.stringify(sampleEnergyDoc, null, 2).slice(0, 3000));
+    console.log("\n=== Fält som innehåller 'image', 'img', 'thumb', 'pic' ===");
+    for (const [key, val] of Object.entries(sampleEnergyDoc)) {
+      if (/image|img|thumb|pic|media|url/i.test(key)) {
+        console.log(`  ${key}: ${JSON.stringify(val).slice(0, 200)}`);
+      }
+    }
+    console.log("===\n");
+  }
+  
   const { products, dropped } = transformAPIResponse(data);
 
   if (products.length < 10) {
