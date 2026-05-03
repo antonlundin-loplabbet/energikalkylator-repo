@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-02 14:43:01Z",
+  "updated": "2026-05-02 18:36:28Z",
   "source": "https://services.intersport.se/api/noselake/searcher/website?q=&site=Loplabbet&hits=4000",
   "count": 109,
   "products": [
@@ -544,26 +544,6 @@
       "inStock": true
     },
     {
-      "id": "1624559",
-      "brand": "Maurten",
-      "name": "Maurten Bicarb System",
-      "type": "bicarb",
-      "carbs": null,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "756",
-        "pricetype": "RegularPrice",
-        "regularprice": "756",
-        "salescontroltype": "Regular",
-        "sortprice": "756"
-      },
-      "url": "1624559/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
-      "inStock": true
-    },
-    {
       "id": "1624557",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
@@ -601,6 +581,26 @@
       },
       "url": "1624560/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162456001000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1624559",
+      "brand": "Maurten",
+      "name": "Maurten Bicarb System",
+      "type": "bicarb",
+      "carbs": null,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "756",
+        "pricetype": "RegularPrice",
+        "regularprice": "756",
+        "salescontroltype": "Regular",
+        "sortprice": "756"
+      },
+      "url": "1624559/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
       "inStock": true
     },
     {
@@ -984,27 +984,6 @@
       "inStock": true
     },
     {
-      "id": "1611474",
-      "brand": "Spektrum",
-      "name": "Spektrum KESU SPORTGLASÖGON",
-      "type": "drink_mix",
-      "carbs": 40,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "50",
-        "price": "349.5",
-        "pricetype": "CampaignPrice",
-        "regularprice": "699",
-        "salescontroldescription": "SISTA CHANSEN",
-        "salescontroltype": "LastChance",
-        "sortprice": "349.5"
-      },
-      "url": "1611474/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/161147401000_10.jpg",
-      "inStock": true
-    },
-    {
       "id": "1611475",
       "brand": "Spektrum",
       "name": "Spektrum KESU SPORTGLASÖGON",
@@ -1023,6 +1002,27 @@
       },
       "url": "1611475/01",
       "img": "https://cdn.intersport.se/productimages/690x600/161147501000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1611474",
+      "brand": "Spektrum",
+      "name": "Spektrum KESU SPORTGLASÖGON",
+      "type": "drink_mix",
+      "carbs": 40,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "50",
+        "price": "349.5",
+        "pricetype": "CampaignPrice",
+        "regularprice": "699",
+        "salescontroldescription": "SISTA CHANSEN",
+        "salescontroltype": "LastChance",
+        "sortprice": "349.5"
+      },
+      "url": "1611474/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/161147401000_10.jpg",
       "inStock": true
     },
     {
@@ -2106,26 +2106,6 @@
       "inStock": true
     },
     {
-      "id": "1608276",
-      "brand": "Umara",
-      "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
-      "type": "recovery",
-      "carbs": 30,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "369",
-        "pricetype": "RegularPrice",
-        "regularprice": "369",
-        "salescontroltype": "Regular",
-        "sortprice": "369"
-      },
-      "url": "1608276/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/160827601000_10.jpg",
-      "inStock": true
-    },
-    {
       "id": "1593551",
       "brand": "Umara",
       "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
@@ -2143,6 +2123,26 @@
       },
       "url": "1593551/01",
       "img": "https://cdn.intersport.se/productimages/690x600/159355101000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1608276",
+      "brand": "Umara",
+      "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
+      "type": "recovery",
+      "carbs": 30,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "369",
+        "pricetype": "RegularPrice",
+        "regularprice": "369",
+        "salescontroltype": "Regular",
+        "sortprice": "369"
+      },
+      "url": "1608276/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/160827601000_10.jpg",
       "inStock": true
     },
     {
