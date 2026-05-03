@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-03 06:32:54Z",
+  "updated": "2026-05-03 16:24:01Z",
   "source": "https://services.intersport.se/api/noselake/searcher/website?q=&site=Loplabbet&hits=4000",
   "count": 109,
   "products": [
@@ -544,7 +544,7 @@
       "inStock": true
     },
     {
-      "id": "1624558",
+      "id": "1624561",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
       "type": "bicarb",
@@ -559,8 +559,8 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "1624558/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455801000_10.jpg",
+      "url": "1624561/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162456101000_10.jpg",
       "inStock": true
     },
     {
@@ -604,7 +604,7 @@
       "inStock": true
     },
     {
-      "id": "1624561",
+      "id": "1624558",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
       "type": "bicarb",
@@ -619,8 +619,8 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "1624561/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162456101000_10.jpg",
+      "url": "1624558/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455801000_10.jpg",
       "inStock": true
     },
     {
@@ -2106,26 +2106,6 @@
       "inStock": true
     },
     {
-      "id": "1593551",
-      "brand": "Umara",
-      "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
-      "type": "recovery",
-      "carbs": 30,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "369",
-        "pricetype": "RegularPrice",
-        "regularprice": "369",
-        "salescontroltype": "Regular",
-        "sortprice": "369"
-      },
-      "url": "1593551/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/159355101000_10.jpg",
-      "inStock": true
-    },
-    {
       "id": "1608276",
       "brand": "Umara",
       "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
@@ -2143,6 +2123,26 @@
       },
       "url": "1608276/01",
       "img": "https://cdn.intersport.se/productimages/690x600/160827601000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1593551",
+      "brand": "Umara",
+      "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
+      "type": "recovery",
+      "carbs": 30,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "369",
+        "pricetype": "RegularPrice",
+        "regularprice": "369",
+        "salescontroltype": "Regular",
+        "sortprice": "369"
+      },
+      "url": "1593551/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/159355101000_10.jpg",
       "inStock": true
     },
     {
