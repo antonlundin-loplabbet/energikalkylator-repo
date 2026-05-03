@@ -786,14 +786,14 @@ function suggestProducts(plan, products) {
       });
     }
     
-    // Vätskesystem för långa lopp (2,5h+) — där en handflaska räcker inte.
-    // Vi rekommenderar inga specifika västar/ryggsäckar eftersom passform och
-    // kapacitet är extremt personligt. Hänvisar till samlingssidan istället
-    // så användaren själv kan välja modell.
-    if (time_h >= 2.5) {
+    // Vätskesystem — bara på riktiga ultralopp (50K+). På maraton och kortare
+    // räcker en handflaska + vätskestationer, ingen springer ett vägmaraton
+    // med löparväst på sig. Trail-50K och uppåt däremot är ett annat scenario:
+    // glesare stationer, längre tid och man behöver ofta bära mer själv.
+    if (distance >= 50) {
       duringPlan.push({
         heading: "Vätskesystem för långa lopp",
-        detail: `På lopp över 2,5 timmar räcker sällan en handflaska, särskilt om det är varmt eller om vätskestationerna är glest placerade. En löparväst eller ett bärsystem ger plats för flera flaskor, alla dina gels samlat samt utrymme för regnplagg och annat smått. Eftersom passform och kapacitet är väldigt personligt rekommenderar vi att du tittar på vårt sortiment och kommer förbi butiken så hjälper vi dig hitta rätt.`,
+        detail: `På ultradistanser räcker sällan en handflaska, särskilt om det är varmt eller om vätskestationerna är glest placerade. En löparväst eller ett bärsystem ger plats för flera flaskor, alla dina gels samlat samt utrymme för regnplagg och annat smått. Eftersom passform och kapacitet är väldigt personligt rekommenderar vi att du tittar på vårt sortiment och kommer förbi butiken så hjälper vi dig hitta rätt.`,
         link: {
           href: "https://www.loplabbet.se/tillbehor/ryggsackar-vatskesystem",
           label: "Se vårt sortiment av löparryggsäckar och vätskesystem",
@@ -891,7 +891,7 @@ const STEPS = [
   { id: "experience", q: "Hur tränad är du på att äta under löpning?", icon: "bicep",
     sub: "Magtålighet är en träningsfråga. Avancerade kan gå högre i kolhydrater per timme." },
   { id: "brand", q: "Märkesönskemål?", icon: "tag",
-    sub: "Vi rekommenderar produkter ur Löplabbets sortiment. Välj favorit eller blanda." },
+    sub: "Vi har Umara, Maurten och Enervit i sortimentet. Välj favorit eller låt oss blanda." },
   { id: "boosters", q: "Vill du ha med några boosters?", icon: "flask",
     sub: "Avancerade tillskott som ger små men reella prestationsvinster." },
 ];
@@ -921,11 +921,21 @@ body{font-family:var(--font);color:var(--txt);-webkit-font-smoothing:antialiased
 .ek-wrap{width:100%;max-width:720px;margin:0 auto;padding:24px 20px 60px;flex:1;display:flex;flex-direction:column;}
 
 /* ── HEADER ── */
-.ek-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--brd);}
-.ek-head-l{display:flex;align-items:center;gap:14px;}
-.ek-logo{height:32px;object-fit:contain;}
-.ek-tag{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--green);padding:4px 10px;border:1px solid var(--green);border-radius:3px;}
-.ek-step-counter{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);}
+.ek-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--brd);gap:12px;}
+.ek-head-l{display:flex;align-items:center;gap:14px;min-width:0;flex:1;}
+.ek-logo-wrap{display:inline-flex;align-items:center;background:var(--txt);padding:8px 14px;border-radius:6px;flex-shrink:0;}
+.ek-logo{height:24px;object-fit:contain;display:block;}
+.ek-tag{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--green);padding:4px 10px;border:1px solid var(--green);border-radius:3px;white-space:nowrap;}
+.ek-step-counter{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);white-space:nowrap;flex-shrink:0;}
+
+/* Mobil: göm ENERGIKALKYLATOR-taggen — den är redundant eftersom rubriken
+   ändå syns. Ger plats åt logo + step counter utan att de krockar. */
+@media (max-width: 560px) {
+  .ek-head .ek-tag{display:none;}
+  .ek-logo-wrap{padding:6px 10px;}
+  .ek-logo{height:20px;}
+  .ek-step-counter{font-size:10px;}
+}
 
 /* ── PROGRESS ── */
 .ek-prog{height:2px;background:var(--brd);border-radius:2px;margin-bottom:36px;overflow:hidden;}
@@ -1626,10 +1636,12 @@ function EnergiKalkylator() {
           {/* HEADER */}
           <div className="ek-head">
             <div className="ek-head-l">
-              <img className="ek-logo" 
-                   src="https://www.loplabbet.se/globalassets/loplabbet/loggos/loplabbet-logo_new.png" 
-                   alt="Löplabbet"
-                   onError={(e)=>{e.target.style.display='none';}} />
+              <span className="ek-logo-wrap">
+                <img className="ek-logo" 
+                     src="https://www.loplabbet.se/globalassets/loplabbet/loggos/loplabbet-logo_new.png" 
+                     alt="Löplabbet"
+                     onError={(e)=>{e.target.style.display='none';}} />
+              </span>
               <span className="ek-tag">Energikalkylator</span>
             </div>
             {phase === "quiz" && <span className="ek-step-counter">Steg {step + 1} / {STEPS.length}</span>}
@@ -1859,13 +1871,13 @@ function EnergiKalkylator() {
                 <div className="ek-opts">
                   {[
                     { id: "alla", label: "Visa alla", icon: "globe",
-                      desc: "Ingen preferens. Vi väljer den bästa produkten för varje moment, oavsett märke. Till exempel Maurten Drink Mix att ladda med, Umara U Gel under, Enervit R2 efter. Bra för dig som inte är låst vid ett märke." },
+                      desc: "Vi väljer bästa produkten för varje moment, oavsett märke. Bra om du inte är låst vid ett favoritmärke." },
                     { id: "umara", label: "Umara", icon: "drop",
-                      desc: "Svenskt familjeföretag grundat av läkare och näringsfysiologer. Utvecklar produkter med fokus på smak, magtålighet och rena ingredienser. U Sport är en flexibel sportdryck där du själv doserar koncentrationen, U Gel är mjuk och icke-klibbig, U Bar är gjord på riktig mat. Bra för dig som vill ha kontroll över doseringen och föredrar svensktillverkat." },
+                      desc: "Svenskt familjeföretag med fokus på smak, magtålighet och rena ingredienser. Du själv doserar koncentrationen i sportdrycken." },
                     { id: "maurten", label: "Maurten", icon: "hexagon",
-                      desc: "Göteborgsföretag som revolutionerat sportnutritionen med patenterad hydrogelteknik. Kolhydraterna kapslas in i en gel av alginat och pektin som först aktiveras i magsäcken. Det gör det möjligt att ta upp till 100-120 g kolhydrater per timme utan magbesvär. Används av Eliud Kipchoge och flertalet marathonelitlöpare. Bra för dig som vill ladda mycket kolhydrater eller har känslig mage." },
+                      desc: "Göteborgsföretag med patenterad hydrogelteknik som gör att magen klarar 100+ g kolhydrater per timme. Eliud Kipchoges val." },
                     { id: "enervit", label: "Enervit", icon: "gel",
-                      desc: "Italiensk sportnutritionspionjär sedan 1980-talet med stark vetenskaplig bas. Brett sortiment där varje produkt har en specifik roll: Pre Sport-drycken med Branched Cyclic Carbs (BCC) inför start, Sport Gel under loppet, R2 Recovery efteråt. Officiell partner till italienska OS-truppen och flera Tour de France-stall. Bra för dig som vill ha hela kedjan från ett märke." },
+                      desc: "Italiensk sportnutritionspionjär sedan 80-talet. Brett sortiment där varje produkt har en specifik roll – från pre-race till återhämtning." },
                   ].map(o => {
                     const brandKey = o.id === "maurten" ? "Maurten" 
                                    : o.id === "enervit" ? "Enervit" 
