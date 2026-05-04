@@ -159,7 +159,32 @@ function transformAPIResponse(data) {
       displayName = "Maurten Bicarb System";
     }
 
-    const url = doc.url || doc.itemurl || (pNum ? `https://www.loplabbet.se/products/${pNum}/01` : "");
+    // Bygg produkt-URL till loplabbet.se. Olika produkter i feeden har URL:n
+    // i olika format:
+    //   - Vissa har full URL i doc.url (t.ex. "https://www.loplabbet.se/...")
+    //   - Vissa har relativ path i doc.url (t.ex. "/tillbehor/...")
+    //   - Vissa har bara "<pNum>/<colorid>" i doc.itemurl (t.ex. "1615099/01")
+    //   - Vissa saknar URL-fält helt
+    // Vi normaliserar allt till en absolut URL på loplabbet.se.
+    const LL_BASE = "https://www.loplabbet.se";
+    let url;
+    const rawUrl = doc.url || doc.itemurl || "";
+    if (typeof rawUrl === "string" && rawUrl.startsWith("http")) {
+      // Redan absolut — använd som är (men säkra att den pekar på loplabbet.se,
+      // inte intersport.se eller annan domän)
+      url = rawUrl.includes("loplabbet.se") ? rawUrl : rawUrl.replace(/^https?:\/\/[^/]+/, LL_BASE);
+    } else if (typeof rawUrl === "string" && rawUrl.startsWith("/")) {
+      // Relativ path med inledande slash — prefixa med domän
+      url = LL_BASE + rawUrl;
+    } else if (typeof rawUrl === "string" && /^\d+\/\d+$/.test(rawUrl)) {
+      // Format "<pNum>/<colorid>" från doc.itemurl — bygg products-URL
+      url = `${LL_BASE}/products/${rawUrl}`;
+    } else if (pNum) {
+      // Sista fallback: bygg från produktnummer
+      url = `${LL_BASE}/products/${pNum}/01`;
+    } else {
+      url = LL_BASE;
+    }
     
     // CDN-bilder. Intersport-API:et returnerar `itemimages` som en array
     // av filnamn (t.ex. ["116529701000_00.jpg", "116529701000_10.jpg"]) —
