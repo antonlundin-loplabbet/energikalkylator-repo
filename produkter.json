@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-03 16:24:01Z",
+  "updated": "2026-05-04 05:18:17Z",
   "source": "https://services.intersport.se/api/noselake/searcher/website?q=&site=Loplabbet&hits=4000",
   "count": 109,
   "products": [
@@ -19,7 +19,7 @@
         "salescontroltype": "Regular",
         "sortprice": "29"
       },
-      "url": "1541083/01",
+      "url": "https://www.loplabbet.se/products/1541083/01",
       "img": "https://cdn.intersport.se/productimages/690x600/154108301000_10.jpg",
       "inStock": true
     },
@@ -39,7 +39,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1564856/01",
+      "url": "https://www.loplabbet.se/products/1564856/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156485601000_10.jpg",
       "inStock": true
     },
@@ -59,7 +59,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1564857/01",
+      "url": "https://www.loplabbet.se/products/1564857/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156485701000_10.jpg",
       "inStock": true
     },
@@ -79,7 +79,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1409241/01",
+      "url": "https://www.loplabbet.se/products/1409241/01",
       "img": "https://cdn.intersport.se/productimages/690x600/140924101000_10.jpg",
       "inStock": true
     },
@@ -99,7 +99,7 @@
         "salescontroltype": "Regular",
         "sortprice": "46"
       },
-      "url": "1564852/01",
+      "url": "https://www.loplabbet.se/products/1564852/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156485201000_10.jpg",
       "inStock": true
     },
@@ -119,7 +119,7 @@
         "salescontroltype": "Regular",
         "sortprice": "75"
       },
-      "url": "1564855/01",
+      "url": "https://www.loplabbet.se/products/1564855/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156485501000_10.jpg",
       "inStock": true
     },
@@ -139,7 +139,7 @@
         "salescontroltype": "Regular",
         "sortprice": "65"
       },
-      "url": "1433381/01",
+      "url": "https://www.loplabbet.se/products/1433381/01",
       "img": "https://cdn.intersport.se/productimages/690x600/143338101000_10.jpg",
       "inStock": true
     },
@@ -159,7 +159,7 @@
         "salescontroltype": "Regular",
         "sortprice": "160"
       },
-      "url": "1446469/02",
+      "url": "https://www.loplabbet.se/products/1446469/02",
       "img": "https://cdn.intersport.se/productimages/690x600/144646902000_10.jpg",
       "inStock": true
     },
@@ -179,7 +179,7 @@
         "salescontroltype": "Regular",
         "sortprice": "188"
       },
-      "url": "1497267/01",
+      "url": "https://www.loplabbet.se/products/1497267/01",
       "img": "https://cdn.intersport.se/productimages/690x600/149726701000_10.jpg",
       "inStock": true
     },
@@ -199,7 +199,7 @@
         "salescontroltype": "Regular",
         "sortprice": "160"
       },
-      "url": "1446437/01",
+      "url": "https://www.loplabbet.se/products/1446437/01",
       "img": "https://cdn.intersport.se/productimages/690x600/144643701000_20.jpg",
       "inStock": true
     },
@@ -219,7 +219,7 @@
         "salescontroltype": "Regular",
         "sortprice": "46"
       },
-      "url": "1589573/01",
+      "url": "https://www.loplabbet.se/products/1589573/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158957301000_10.jpg",
       "inStock": true
     },
@@ -239,7 +239,7 @@
         "salescontroltype": "Regular",
         "sortprice": "33"
       },
-      "url": "1564853/01",
+      "url": "https://www.loplabbet.se/products/1564853/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156485301000_10.jpg",
       "inStock": true
     },
@@ -259,7 +259,7 @@
         "salescontroltype": "Regular",
         "sortprice": "33"
       },
-      "url": "1629119/01",
+      "url": "https://www.loplabbet.se/products/1629119/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162911901000_10.jpg",
       "inStock": true
     },
@@ -279,7 +279,7 @@
         "salescontroltype": "Regular",
         "sortprice": "33"
       },
-      "url": "1564854/01",
+      "url": "https://www.loplabbet.se/products/1564854/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156485401000_10.jpg",
       "inStock": true
     },
@@ -299,7 +299,7 @@
         "salescontroltype": "Regular",
         "sortprice": "46"
       },
-      "url": "1420191/01",
+      "url": "https://www.loplabbet.se/products/1420191/01",
       "img": "https://cdn.intersport.se/productimages/690x600/142019101000_10.jpg",
       "inStock": true
     },
@@ -319,7 +319,7 @@
         "salescontroltype": "Regular",
         "sortprice": "39"
       },
-      "url": "1458731/01",
+      "url": "https://www.loplabbet.se/products/1458731/01",
       "img": "https://cdn.intersport.se/productimages/690x600/145873101000_10.jpg",
       "inStock": true
     },
@@ -339,7 +339,7 @@
         "salescontroltype": "Regular",
         "sortprice": "49"
       },
-      "url": "759984/01",
+      "url": "https://www.loplabbet.se/products/759984/01",
       "img": "https://cdn.intersport.se/productimages/690x600/075998401000_10.jpg",
       "inStock": true
     },
@@ -359,7 +359,7 @@
         "salescontroltype": "Regular",
         "sortprice": "46"
       },
-      "url": "1545993/01",
+      "url": "https://www.loplabbet.se/products/1545993/01",
       "img": "https://cdn.intersport.se/productimages/690x600/154599301000_10.jpg",
       "inStock": true
     },
@@ -379,7 +379,7 @@
         "salescontroltype": "Regular",
         "sortprice": "37"
       },
-      "url": "1441516/01",
+      "url": "https://www.loplabbet.se/products/1441516/01",
       "img": "https://cdn.intersport.se/productimages/690x600/144151601000_10.jpg",
       "inStock": true
     },
@@ -399,7 +399,7 @@
         "salescontroltype": "Regular",
         "sortprice": "37"
       },
-      "url": "1434163/01",
+      "url": "https://www.loplabbet.se/products/1434163/01",
       "img": "https://cdn.intersport.se/productimages/690x600/143416301000_10.jpg",
       "inStock": true
     },
@@ -419,7 +419,7 @@
         "salescontroltype": "Regular",
         "sortprice": "46"
       },
-      "url": "1589572/01",
+      "url": "https://www.loplabbet.se/products/1589572/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158957201000_10.jpg",
       "inStock": true
     },
@@ -439,7 +439,7 @@
         "salescontroltype": "Regular",
         "sortprice": "37"
       },
-      "url": "1420190/01",
+      "url": "https://www.loplabbet.se/products/1420190/01",
       "img": "https://cdn.intersport.se/productimages/690x600/142019001000_10.jpg",
       "inStock": true
     },
@@ -459,7 +459,7 @@
         "salescontroltype": "Regular",
         "sortprice": "39"
       },
-      "url": "1165297/01",
+      "url": "https://www.loplabbet.se/products/1165297/01",
       "img": "https://cdn.intersport.se/productimages/690x600/116529701000_00.jpg",
       "inStock": true
     },
@@ -479,7 +479,7 @@
         "salescontroltype": "Regular",
         "sortprice": "45"
       },
-      "url": "1497266/01",
+      "url": "https://www.loplabbet.se/products/1497266/01",
       "img": "https://cdn.intersport.se/productimages/690x600/149726601000_10.jpg",
       "inStock": true
     },
@@ -499,7 +499,7 @@
         "salescontroltype": "Regular",
         "sortprice": "199"
       },
-      "url": "1025359/01",
+      "url": "https://www.loplabbet.se/products/1025359/01",
       "img": "https://cdn.intersport.se/productimages/690x600/102535901000_10.jpg",
       "inStock": true
     },
@@ -519,7 +519,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1632401/01",
+      "url": "https://www.loplabbet.se/products/1632401/01",
       "img": "https://cdn.intersport.se/productimages/690x600/163240101000_10.jpg",
       "inStock": true
     },
@@ -539,8 +539,48 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1632402/01",
+      "url": "https://www.loplabbet.se/products/1632402/01",
       "img": "https://cdn.intersport.se/productimages/690x600/163240201000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1624559",
+      "brand": "Maurten",
+      "name": "Maurten Bicarb System",
+      "type": "bicarb",
+      "carbs": null,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "756",
+        "pricetype": "RegularPrice",
+        "regularprice": "756",
+        "salescontroltype": "Regular",
+        "sortprice": "756"
+      },
+      "url": "https://www.loplabbet.se/products/1624559/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1624557",
+      "brand": "Maurten",
+      "name": "Maurten Bicarb System",
+      "type": "bicarb",
+      "carbs": null,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "756",
+        "pricetype": "RegularPrice",
+        "regularprice": "756",
+        "salescontroltype": "Regular",
+        "sortprice": "756"
+      },
+      "url": "https://www.loplabbet.se/products/1624557/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455701000_10.jpg",
       "inStock": true
     },
     {
@@ -559,7 +599,7 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "1624561/01",
+      "url": "https://www.loplabbet.se/products/1624561/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162456101000_10.jpg",
       "inStock": true
     },
@@ -579,28 +619,8 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "1624560/01",
+      "url": "https://www.loplabbet.se/products/1624560/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162456001000_10.jpg",
-      "inStock": true
-    },
-    {
-      "id": "1624557",
-      "brand": "Maurten",
-      "name": "Maurten Bicarb System",
-      "type": "bicarb",
-      "carbs": null,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "756",
-        "pricetype": "RegularPrice",
-        "regularprice": "756",
-        "salescontroltype": "Regular",
-        "sortprice": "756"
-      },
-      "url": "1624557/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455701000_10.jpg",
       "inStock": true
     },
     {
@@ -619,28 +639,8 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "1624558/01",
+      "url": "https://www.loplabbet.se/products/1624558/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162455801000_10.jpg",
-      "inStock": true
-    },
-    {
-      "id": "1624559",
-      "brand": "Maurten",
-      "name": "Maurten Bicarb System",
-      "type": "bicarb",
-      "carbs": null,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "756",
-        "pricetype": "RegularPrice",
-        "regularprice": "756",
-        "salescontroltype": "Regular",
-        "sortprice": "756"
-      },
-      "url": "1624559/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
       "inStock": true
     },
     {
@@ -659,7 +659,7 @@
         "salescontroltype": "Regular",
         "sortprice": "470"
       },
-      "url": "1480085/01",
+      "url": "https://www.loplabbet.se/products/1480085/01",
       "img": "https://cdn.intersport.se/productimages/690x600/148008501000_10.jpg",
       "inStock": true
     },
@@ -679,7 +679,7 @@
         "salescontroltype": "Regular",
         "sortprice": "423"
       },
-      "url": "1484608/01",
+      "url": "https://www.loplabbet.se/products/1484608/01",
       "img": "https://cdn.intersport.se/productimages/690x600/148460801000_10.jpg",
       "inStock": true
     },
@@ -699,7 +699,7 @@
         "salescontroltype": "Regular",
         "sortprice": "565"
       },
-      "url": "1497175/01",
+      "url": "https://www.loplabbet.se/products/1497175/01",
       "img": "https://cdn.intersport.se/productimages/690x600/149717501000_40.jpg",
       "inStock": true
     },
@@ -719,7 +719,7 @@
         "salescontroltype": "Regular",
         "sortprice": "42"
       },
-      "url": "1497176/01",
+      "url": "https://www.loplabbet.se/products/1497176/01",
       "img": "https://cdn.intersport.se/productimages/690x600/149717601000_10.jpg",
       "inStock": true
     },
@@ -739,7 +739,7 @@
         "salescontroltype": "Regular",
         "sortprice": "37"
       },
-      "url": "1433071/01",
+      "url": "https://www.loplabbet.se/products/1433071/01",
       "img": "https://cdn.intersport.se/productimages/690x600/143307101000_10.jpg",
       "inStock": true
     },
@@ -759,7 +759,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1428773/01",
+      "url": "https://www.loplabbet.se/products/1428773/01",
       "img": "https://cdn.intersport.se/productimages/690x600/142877301000_10.jpg",
       "inStock": true
     },
@@ -779,7 +779,7 @@
         "salescontroltype": "Regular",
         "sortprice": "423"
       },
-      "url": "1480084/01",
+      "url": "https://www.loplabbet.se/products/1480084/01",
       "img": "https://cdn.intersport.se/productimages/690x600/148008401000_10.jpg",
       "inStock": true
     },
@@ -799,7 +799,7 @@
         "salescontroltype": "Regular",
         "sortprice": "37"
       },
-      "url": "1442432/01",
+      "url": "https://www.loplabbet.se/products/1442432/01",
       "img": "https://cdn.intersport.se/productimages/690x600/144243201000_10.jpg",
       "inStock": true
     },
@@ -819,7 +819,7 @@
         "salescontroltype": "Regular",
         "sortprice": "520"
       },
-      "url": "1570244/01",
+      "url": "https://www.loplabbet.se/products/1570244/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157024401000_10.jpg",
       "inStock": true
     },
@@ -839,7 +839,7 @@
         "salescontroltype": "Regular",
         "sortprice": "565"
       },
-      "url": "1622161/01",
+      "url": "https://www.loplabbet.se/products/1622161/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162216101000_10.jpg",
       "inStock": true
     },
@@ -859,7 +859,7 @@
         "salescontroltype": "Regular",
         "sortprice": "52"
       },
-      "url": "1570246/01",
+      "url": "https://www.loplabbet.se/products/1570246/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157024601000_10.jpg",
       "inStock": true
     },
@@ -879,7 +879,7 @@
         "salescontroltype": "Regular",
         "sortprice": "470"
       },
-      "url": "1480083/01",
+      "url": "https://www.loplabbet.se/products/1480083/01",
       "img": "https://cdn.intersport.se/productimages/690x600/148008301000_10.jpg",
       "inStock": true
     },
@@ -899,7 +899,7 @@
         "salescontroltype": "Regular",
         "sortprice": "42"
       },
-      "url": "1469927/01",
+      "url": "https://www.loplabbet.se/products/1469927/01",
       "img": "https://cdn.intersport.se/productimages/690x600/146992701000_10.jpg",
       "inStock": true
     },
@@ -919,7 +919,7 @@
         "salescontroltype": "Regular",
         "sortprice": "219"
       },
-      "url": "1596776/01",
+      "url": "https://www.loplabbet.se/products/1596776/01",
       "img": "https://cdn.intersport.se/productimages/690x600/159677601000_10.jpg",
       "inStock": true
     },
@@ -939,7 +939,7 @@
         "salescontroltype": "Regular",
         "sortprice": "302"
       },
-      "url": "1596725/01",
+      "url": "https://www.loplabbet.se/products/1596725/01",
       "img": "https://cdn.intersport.se/productimages/690x600/159672501000_10.jpg",
       "inStock": true
     },
@@ -959,7 +959,7 @@
         "salescontroltype": "Regular",
         "sortprice": "236"
       },
-      "url": "1606575/01",
+      "url": "https://www.loplabbet.se/products/1606575/01",
       "img": "https://cdn.intersport.se/productimages/690x600/160657501000_20.jpg",
       "inStock": true
     },
@@ -979,7 +979,7 @@
         "salescontroltype": "Regular",
         "sortprice": "399"
       },
-      "url": "1570631/01",
+      "url": "https://www.loplabbet.se/products/1570631/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157063101000_10.jpg",
       "inStock": true
     },
@@ -1000,7 +1000,7 @@
         "salescontroltype": "LastChance",
         "sortprice": "349.5"
       },
-      "url": "1611475/01",
+      "url": "https://www.loplabbet.se/products/1611475/01",
       "img": "https://cdn.intersport.se/productimages/690x600/161147501000_10.jpg",
       "inStock": true
     },
@@ -1021,7 +1021,7 @@
         "salescontroltype": "LastChance",
         "sortprice": "349.5"
       },
-      "url": "1611474/01",
+      "url": "https://www.loplabbet.se/products/1611474/01",
       "img": "https://cdn.intersport.se/productimages/690x600/161147401000_10.jpg",
       "inStock": true
     },
@@ -1041,7 +1041,7 @@
         "salescontroltype": "Regular",
         "sortprice": "399"
       },
-      "url": "1578289/01",
+      "url": "https://www.loplabbet.se/products/1578289/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157828901000_10.jpg",
       "inStock": true
     },
@@ -1061,7 +1061,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1608672/01",
+      "url": "https://www.loplabbet.se/products/1608672/01",
       "img": "https://cdn.intersport.se/productimages/690x600/160867201000_10.jpg",
       "inStock": true
     },
@@ -1081,7 +1081,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1582114/01",
+      "url": "https://www.loplabbet.se/products/1582114/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158211401000_10.jpg",
       "inStock": true
     },
@@ -1101,7 +1101,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1566791/01",
+      "url": "https://www.loplabbet.se/products/1566791/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156679101000_10.jpg",
       "inStock": true
     },
@@ -1121,7 +1121,7 @@
         "salescontroltype": "Regular",
         "sortprice": "25"
       },
-      "url": "1546751/01",
+      "url": "https://www.loplabbet.se/products/1546751/01",
       "img": "https://cdn.intersport.se/productimages/690x600/154675101000_10.jpg",
       "inStock": true
     },
@@ -1141,7 +1141,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1596899/01",
+      "url": "https://www.loplabbet.se/products/1596899/01",
       "img": "https://cdn.intersport.se/productimages/690x600/159689901000_10.jpg",
       "inStock": true
     },
@@ -1161,7 +1161,7 @@
         "salescontroltype": "Regular",
         "sortprice": "25"
       },
-      "url": "1482876/01",
+      "url": "https://www.loplabbet.se/products/1482876/01",
       "img": "https://cdn.intersport.se/productimages/690x600/148287601000_10.jpg",
       "inStock": true
     },
@@ -1181,7 +1181,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1617996/01",
+      "url": "https://www.loplabbet.se/products/1617996/01",
       "img": "https://cdn.intersport.se/productimages/690x600/161799601000_10.jpg",
       "inStock": true
     },
@@ -1201,7 +1201,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1617995/01",
+      "url": "https://www.loplabbet.se/products/1617995/01",
       "img": "https://cdn.intersport.se/productimages/690x600/161799501000_10.jpg",
       "inStock": true
     },
@@ -1221,7 +1221,7 @@
         "salescontroltype": "Regular",
         "sortprice": "29"
       },
-      "url": "1650433/01",
+      "url": "https://www.loplabbet.se/products/1650433/01",
       "img": "https://cdn.intersport.se/productimages/690x600/165043301000_10.jpg",
       "inStock": true
     },
@@ -1241,7 +1241,7 @@
         "salescontroltype": "Regular",
         "sortprice": "29"
       },
-      "url": "1667245/01",
+      "url": "https://www.loplabbet.se/products/1667245/01",
       "img": "https://cdn.intersport.se/productimages/690x600/166724501000_10.jpg",
       "inStock": true
     },
@@ -1261,7 +1261,7 @@
         "salescontroltype": "Regular",
         "sortprice": "25"
       },
-      "url": "1560625/01",
+      "url": "https://www.loplabbet.se/products/1560625/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156062501000_10.jpg",
       "inStock": true
     },
@@ -1281,7 +1281,7 @@
         "salescontroltype": "Regular",
         "sortprice": "27"
       },
-      "url": "1466058/01",
+      "url": "https://www.loplabbet.se/products/1466058/01",
       "img": "https://cdn.intersport.se/productimages/690x600/146605801000_10.jpg",
       "inStock": true
     },
@@ -1301,7 +1301,7 @@
         "salescontroltype": "Regular",
         "sortprice": "25"
       },
-      "url": "1470800/01",
+      "url": "https://www.loplabbet.se/products/1470800/01",
       "img": "https://cdn.intersport.se/productimages/690x600/147080001000_10.jpg",
       "inStock": true
     },
@@ -1321,7 +1321,7 @@
         "salescontroltype": "Regular",
         "sortprice": "25"
       },
-      "url": "1521373/01",
+      "url": "https://www.loplabbet.se/products/1521373/01",
       "img": "https://cdn.intersport.se/productimages/690x600/152137301000_101.jpg",
       "inStock": true
     },
@@ -1341,7 +1341,7 @@
         "salescontroltype": "Regular",
         "sortprice": "24"
       },
-      "url": "1481899/01",
+      "url": "https://www.loplabbet.se/products/1481899/01",
       "img": "https://cdn.intersport.se/productimages/690x600/148189901000_10.jpg",
       "inStock": true
     },
@@ -1361,7 +1361,7 @@
         "salescontroltype": "Regular",
         "sortprice": "359"
       },
-      "url": "1585859/01",
+      "url": "https://www.loplabbet.se/products/1585859/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158585901000_10.jpg",
       "inStock": true
     },
@@ -1381,7 +1381,7 @@
         "salescontroltype": "Regular",
         "sortprice": "169"
       },
-      "url": "1518458/01",
+      "url": "https://www.loplabbet.se/products/1518458/01",
       "img": "https://cdn.intersport.se/productimages/690x600/151845801000_10.jpg",
       "inStock": true
     },
@@ -1401,7 +1401,7 @@
         "salescontroltype": "Regular",
         "sortprice": "251"
       },
-      "url": "1577234/01",
+      "url": "https://www.loplabbet.se/products/1577234/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157723401000_10.jpg",
       "inStock": true
     },
@@ -1421,7 +1421,7 @@
         "salescontroltype": "Regular",
         "sortprice": "251"
       },
-      "url": "1562815/01",
+      "url": "https://www.loplabbet.se/products/1562815/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156281501000_10.jpg",
       "inStock": true
     },
@@ -1441,7 +1441,7 @@
         "salescontroltype": "Regular",
         "sortprice": "409"
       },
-      "url": "1544693/01",
+      "url": "https://www.loplabbet.se/products/1544693/01",
       "img": "https://cdn.intersport.se/productimages/690x600/154469301000_10.jpg",
       "inStock": true
     },
@@ -1461,7 +1461,7 @@
         "salescontroltype": "Regular",
         "sortprice": "415"
       },
-      "url": "1588987/01",
+      "url": "https://www.loplabbet.se/products/1588987/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158898701000_10.jpg",
       "inStock": true
     },
@@ -1481,7 +1481,7 @@
         "salescontroltype": "Regular",
         "sortprice": "33"
       },
-      "url": "1584356/01",
+      "url": "https://www.loplabbet.se/products/1584356/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158435601000_10.jpg",
       "inStock": true
     },
@@ -1501,7 +1501,7 @@
         "salescontroltype": "Regular",
         "sortprice": "169"
       },
-      "url": "1514327/01",
+      "url": "https://www.loplabbet.se/products/1514327/01",
       "img": "https://cdn.intersport.se/productimages/690x600/151432701000_10.jpg",
       "inStock": true
     },
@@ -1521,7 +1521,7 @@
         "salescontroltype": "Regular",
         "sortprice": "415"
       },
-      "url": "1585442/01",
+      "url": "https://www.loplabbet.se/products/1585442/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158544201000_10.jpg",
       "inStock": true
     },
@@ -1541,7 +1541,7 @@
         "salescontroltype": "Regular",
         "sortprice": "945"
       },
-      "url": "1564229/01",
+      "url": "https://www.loplabbet.se/products/1564229/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156422901000_10.jpg",
       "inStock": true
     },
@@ -1561,7 +1561,7 @@
         "salescontroltype": "Regular",
         "sortprice": "33"
       },
-      "url": "1584353/01",
+      "url": "https://www.loplabbet.se/products/1584353/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158435301000_10.jpg",
       "inStock": true
     },
@@ -1581,7 +1581,7 @@
         "salescontroltype": "Regular",
         "sortprice": "409"
       },
-      "url": "1491033/01",
+      "url": "https://www.loplabbet.se/products/1491033/01",
       "img": "https://cdn.intersport.se/productimages/690x600/149103301000_10.jpg",
       "inStock": true
     },
@@ -1601,7 +1601,7 @@
         "salescontroltype": "Regular",
         "sortprice": "415"
       },
-      "url": "1585443/01",
+      "url": "https://www.loplabbet.se/products/1585443/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158544301000_10.jpg",
       "inStock": true
     },
@@ -1621,7 +1621,7 @@
         "salescontroltype": "Regular",
         "sortprice": "33"
       },
-      "url": "1584355/01",
+      "url": "https://www.loplabbet.se/products/1584355/01",
       "img": "https://cdn.intersport.se/productimages/690x600/158435501000_10.jpg",
       "inStock": true
     },
@@ -1641,7 +1641,7 @@
         "salescontroltype": "Regular",
         "sortprice": "415"
       },
-      "url": "1597164/01",
+      "url": "https://www.loplabbet.se/products/1597164/01",
       "img": "https://cdn.intersport.se/productimages/690x600/159716401000_10.jpg",
       "inStock": true
     },
@@ -1661,7 +1661,7 @@
         "salescontroltype": "Regular",
         "sortprice": "33"
       },
-      "url": "1613473/01",
+      "url": "https://www.loplabbet.se/products/1613473/01",
       "img": "https://cdn.intersport.se/productimages/690x600/161347301000_10.jpg",
       "inStock": true
     },
@@ -1681,7 +1681,7 @@
         "salescontroltype": "Regular",
         "sortprice": "37"
       },
-      "url": "1468114/01",
+      "url": "https://www.loplabbet.se/products/1468114/01",
       "img": "https://cdn.intersport.se/productimages/690x600/146811401000_10.jpg",
       "inStock": true
     },
@@ -1701,7 +1701,7 @@
         "salescontroltype": "Regular",
         "sortprice": "37"
       },
-      "url": "1468115/01",
+      "url": "https://www.loplabbet.se/products/1468115/01",
       "img": "https://cdn.intersport.se/productimages/690x600/146811501000_10.jpg",
       "inStock": true
     },
@@ -1721,7 +1721,7 @@
         "salescontroltype": "Regular",
         "sortprice": "65"
       },
-      "url": "1546805/01",
+      "url": "https://www.loplabbet.se/products/1546805/01",
       "img": "https://cdn.intersport.se/productimages/690x600/154680501000_10.jpg",
       "inStock": true
     },
@@ -1741,7 +1741,7 @@
         "salescontroltype": "Regular",
         "sortprice": "65"
       },
-      "url": "1484605/01",
+      "url": "https://www.loplabbet.se/products/1484605/01",
       "img": "https://cdn.intersport.se/productimages/690x600/148460501000_10.jpg",
       "inStock": true
     },
@@ -1761,7 +1761,7 @@
         "salescontroltype": "Regular",
         "sortprice": "30"
       },
-      "url": "1631464/01",
+      "url": "https://www.loplabbet.se/products/1631464/01",
       "img": "https://cdn.intersport.se/productimages/690x600/163146401000_10.jpg",
       "inStock": true
     },
@@ -1781,7 +1781,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1667214/01",
+      "url": "https://www.loplabbet.se/products/1667214/01",
       "img": "https://cdn.intersport.se/productimages/690x600/166721401000_10.jpg",
       "inStock": true
     },
@@ -1801,7 +1801,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1612435/01",
+      "url": "https://www.loplabbet.se/products/1612435/01",
       "img": "https://cdn.intersport.se/productimages/690x600/161243501000_10.jpg",
       "inStock": true
     },
@@ -1821,7 +1821,7 @@
         "salescontroltype": "Regular",
         "sortprice": "25"
       },
-      "url": "1521945/01",
+      "url": "https://www.loplabbet.se/products/1521945/01",
       "img": "https://cdn.intersport.se/productimages/690x600/152194501000_10.jpg",
       "inStock": true
     },
@@ -1841,7 +1841,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1631463/01",
+      "url": "https://www.loplabbet.se/products/1631463/01",
       "img": "https://cdn.intersport.se/productimages/690x600/163146301000_10.jpg",
       "inStock": true
     },
@@ -1861,7 +1861,7 @@
         "salescontroltype": "Regular",
         "sortprice": "18"
       },
-      "url": "1537855/01",
+      "url": "https://www.loplabbet.se/products/1537855/01",
       "img": "https://cdn.intersport.se/productimages/690x600/153785501000_10.jpg",
       "inStock": true
     },
@@ -1881,7 +1881,7 @@
         "salescontroltype": "Regular",
         "sortprice": "18"
       },
-      "url": "1537174/01",
+      "url": "https://www.loplabbet.se/products/1537174/01",
       "img": "https://cdn.intersport.se/productimages/690x600/153717401000_10.jpg",
       "inStock": true
     },
@@ -1901,7 +1901,7 @@
         "salescontroltype": "Regular",
         "sortprice": "112"
       },
-      "url": "1519398/01",
+      "url": "https://www.loplabbet.se/products/1519398/01",
       "img": "https://cdn.intersport.se/productimages/690x600/151939801000_10.jpg",
       "inStock": true
     },
@@ -1921,7 +1921,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1575983/01",
+      "url": "https://www.loplabbet.se/products/1575983/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157598301000_10.jpg",
       "inStock": true
     },
@@ -1941,7 +1941,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1575984/01",
+      "url": "https://www.loplabbet.se/products/1575984/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157598401000_10.jpg",
       "inStock": true
     },
@@ -1961,7 +1961,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1667216/01",
+      "url": "https://www.loplabbet.se/products/1667216/01",
       "img": "https://cdn.intersport.se/productimages/690x600/166721601000_10.jpg",
       "inStock": true
     },
@@ -1981,7 +1981,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1575981/01",
+      "url": "https://www.loplabbet.se/products/1575981/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157598101000_10.jpg",
       "inStock": true
     },
@@ -2001,7 +2001,7 @@
         "salescontroltype": "Regular",
         "sortprice": "29"
       },
-      "url": "1533655/01",
+      "url": "https://www.loplabbet.se/products/1533655/01",
       "img": "https://cdn.intersport.se/productimages/690x600/153365501000_10.jpg",
       "inStock": true
     },
@@ -2021,7 +2021,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1575982/01",
+      "url": "https://www.loplabbet.se/products/1575982/01",
       "img": "https://cdn.intersport.se/productimages/690x600/157598201000_10.jpg",
       "inStock": true
     },
@@ -2041,7 +2041,7 @@
         "salescontroltype": "Regular",
         "sortprice": "274"
       },
-      "url": "1622194/01",
+      "url": "https://www.loplabbet.se/products/1622194/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162219401000_10.jpg",
       "inStock": true
     },
@@ -2061,7 +2061,7 @@
         "salescontroltype": "Regular",
         "sortprice": "24"
       },
-      "url": "1521374/01",
+      "url": "https://www.loplabbet.se/products/1521374/01",
       "img": "https://cdn.intersport.se/productimages/690x600/152137401000_10.jpg",
       "inStock": true
     },
@@ -2081,7 +2081,7 @@
         "salescontroltype": "Regular",
         "sortprice": "272"
       },
-      "url": "1497108/01",
+      "url": "https://www.loplabbet.se/products/1497108/01",
       "img": "https://cdn.intersport.se/productimages/690x600/149710801000_10.jpg",
       "inStock": true
     },
@@ -2101,28 +2101,8 @@
         "salescontroltype": "Regular",
         "sortprice": "236"
       },
-      "url": "1497109/01",
+      "url": "https://www.loplabbet.se/products/1497109/01",
       "img": "https://cdn.intersport.se/productimages/690x600/149710901000_10.jpg",
-      "inStock": true
-    },
-    {
-      "id": "1608276",
-      "brand": "Umara",
-      "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
-      "type": "recovery",
-      "carbs": 30,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "369",
-        "pricetype": "RegularPrice",
-        "regularprice": "369",
-        "salescontroltype": "Regular",
-        "sortprice": "369"
-      },
-      "url": "1608276/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/160827601000_10.jpg",
       "inStock": true
     },
     {
@@ -2141,8 +2121,28 @@
         "salescontroltype": "Regular",
         "sortprice": "369"
       },
-      "url": "1593551/01",
+      "url": "https://www.loplabbet.se/products/1593551/01",
       "img": "https://cdn.intersport.se/productimages/690x600/159355101000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1608276",
+      "brand": "Umara",
+      "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
+      "type": "recovery",
+      "carbs": 30,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "369",
+        "pricetype": "RegularPrice",
+        "regularprice": "369",
+        "salescontroltype": "Regular",
+        "sortprice": "369"
+      },
+      "url": "https://www.loplabbet.se/products/1608276/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/160827601000_10.jpg",
       "inStock": true
     },
     {
@@ -2161,7 +2161,7 @@
         "salescontroltype": "Regular",
         "sortprice": "28"
       },
-      "url": "1382001/01",
+      "url": "https://www.loplabbet.se/products/1382001/01",
       "img": "https://cdn.intersport.se/productimages/690x600/138200101000_10.jpg",
       "inStock": true
     },
@@ -2181,7 +2181,7 @@
         "salescontroltype": "Regular",
         "sortprice": "283"
       },
-      "url": "1153450/01",
+      "url": "https://www.loplabbet.se/products/1153450/01",
       "img": "https://cdn.intersport.se/productimages/690x600/115345001000_10.jpg",
       "inStock": true
     }
