@@ -920,6 +920,15 @@ body{font-family:var(--font);color:var(--txt);-webkit-font-smoothing:antialiased
                    radial-gradient(circle at -5% 100%,rgba(37,99,235,.05),transparent 55%);}
 .ek-wrap{width:100%;max-width:720px;margin:0 auto;padding:24px 20px 60px;flex:1;display:flex;flex-direction:column;}
 
+/* När kalkylatorn bäddas in i en iframe (EpiServer) används URL-parametern
+   ?embed=1 för att gömma headern och minska luft kring innehållet — sidans
+   egen header säger redan Löplabbet och kalkylatorns layout ska börja direkt.
+   I standalone-läget (egen URL, egen flik) visas headern som vanligt. */
+.ek.is-embed .ek-head{display:none;}
+.ek.is-embed .ek-wrap{padding:0 0 40px;max-width:none;}
+.ek.is-embed .ek-prog{margin-bottom:24px;}
+.ek.is-embed .ek-intro{min-height:auto;justify-content:flex-start;padding:0;}
+
 /* ── HEADER ── */
 .ek-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--brd);gap:12px;}
 .ek-head-l{display:flex;align-items:center;gap:14px;min-width:0;flex:1;}
@@ -1475,6 +1484,18 @@ const SEX_DEFAULTS = {
 };
 
 function EnergiKalkylator() {
+  // Detektera om vi körs i iframe (typiskt embed på loplabbet.se via EpiServer).
+  // I så fall göms headern och inre padding minskas för att smälta in i sidan
+  // som redan har sin egen Löplabbet-header.
+  // Kan också tvingas på via URL-parameter ?embed=1 för testning.
+  const isEmbed = useMemo(() => {
+    try {
+      if (window.parent !== window) return true;
+      if (new URLSearchParams(window.location.search).get("embed") === "1") return true;
+    } catch (e) { /* sandboxed iframe → behandla som embed */ return true; }
+    return false;
+  }, []);
+  
   const [phase, setPhase] = useState("intro");      // intro | quiz | calc | result
   const [step, setStep] = useState(0);
   const [ans, setAns] = useState({
@@ -1565,7 +1586,14 @@ function EnergiKalkylator() {
     try {
       window.scrollTo({ top: 0, behavior: "smooth" });
       if (window.parent !== window) {
+        // Posta direkt + igen efter att React renderat och iframen rapporterat
+        // ny höjd. Annars kan parent scrolla till iframens GAMLA position
+        // (t.ex. när man trycker Räkna om från resultatet → intro: iframen
+        // krymps men scrollen hade redan beräknats mot resulthöjden).
         window.parent.postMessage({ type: "energikalkylator:scrollTop" }, "*");
+        setTimeout(() => {
+          window.parent.postMessage({ type: "energikalkylator:scrollTop" }, "*");
+        }, 200);
       }
     } catch (e) { /* tyst fallback */ }
   };
@@ -1630,7 +1658,7 @@ function EnergiKalkylator() {
   return (
     <>
       <style>{css}</style>
-      <div className="ek">
+      <div className={`ek${isEmbed ? " is-embed" : ""}`}>
         <div className="ek-wrap">
           
           {/* HEADER */}
