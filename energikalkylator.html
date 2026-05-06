@@ -593,15 +593,28 @@ function suggestProducts(plan, products) {
     const anyGelCaf    = inStockSorted.find(p => p.type === "gel_caf");
     
     let preProduct = null;
+    let preAmount  = "";  // valfritt — visas i produktkortet
     let preDetail = "";
     const shortRace = time_h < 1.5;
     
+    // För erfarna/elite-löpare på korta intensiva lopp (≤ halvmara) kan en
+    // andra koffein-gel ge ytterligare 1-2% effekt. Vetenskapligt intervall
+    // för koffein är 3-6 mg/kg → en 70kg-löpare landar på 210-420 mg, vilket
+    // motsvarar 2-4 vanliga gels (100mg/st). Dubbeldos är dock inget för
+    // nya löpare och kan ge magbesvär — därför endast vid experience=elite.
+    const isElitePush = ans.experience === "elite" && time_h <= 2 && plan.distance <= 21.1;
+
     if (brandPreDrink) {
       preProduct = brandPreDrink;
       preDetail = `${brandPreDrink.name} är specifikt utformad som pre-race-energi med snabba kolhydrater och koffein. Ta den 30-45 min innan start så hinner koffeinet ge full effekt lagom till starten.`;
     } else if (brandGelCaf) {
       preProduct = brandGelCaf;
-      preDetail = `Ta ${brandGelCaf.name} cirka 30-45 min innan start. Koffein behöver 20-30 min för att ge full effekt, då kommer den vara på plats precis när du startar.${shortRace ? " På ett kort lopp som detta är timingen extra viktig: tar du koffeinet vid start hinner du knappt få effekten innan du är i mål." : ""}`;
+      if (isElitePush) {
+        preAmount = "1-2 st";
+        preDetail = `Ta 1-2 st ${brandGelCaf.name} cirka 30-45 min innan start. Koffein behöver 20-30 min för att ge full effekt, då kommer den vara på plats precis när du startar. Vana löpare som siktar på en topptid kan dubbla dosen — vetenskapligt intervall är 3-6 mg/kg (för dig ${Math.round(plan.weight * 3)}-${Math.round(plan.weight * 6)} mg). Provkör alltid på träning först eftersom dubbel dos kan ge magbesvär eller hjärtklappning hos vissa.`;
+      } else {
+        preDetail = `Ta ${brandGelCaf.name} cirka 30-45 min innan start. Koffein behöver 20-30 min för att ge full effekt, då kommer den vara på plats precis när du startar.${shortRace ? " På ett kort lopp som detta är timingen extra viktig: tar du koffeinet vid start hinner du knappt få effekten innan du är i mål." : ""}`;
+      }
     } else if (brandGel) {
       preProduct = brandGel;
       preDetail = `Ta ${brandGel.name} 15-30 min innan start för en sista energiboost precis när loppet drar igång.${anyGelCaf ? " Vill du också ha koffein? Komplettera med en koffein-gel ca 30-45 min före start så hinner effekten komma igång till starten." : ""}`;
@@ -618,6 +631,7 @@ function suggestProducts(plan, products) {
       heading: "Sista pre-race-boost",
       detail: preDetail,
       product: preProduct,
+      productAmount: preAmount,  // valfritt: ändrar mängd-texten på produktkortet
     });
   }
   // Sortera kronologiskt (störst sortKey = tidigast aktivitet först)
@@ -925,9 +939,9 @@ body{font-family:var(--font);color:var(--txt);-webkit-font-smoothing:antialiased
    egen header säger redan Löplabbet och kalkylatorns layout ska börja direkt.
    I standalone-läget (egen URL, egen flik) visas headern som vanligt. */
 .ek.is-embed .ek-head{display:none;}
-.ek.is-embed .ek-wrap{padding:0 20px 40px;max-width:720px;}
+.ek.is-embed .ek-wrap{padding:0 0 40px;max-width:none;}
 .ek.is-embed .ek-prog{margin-bottom:24px;}
-.ek.is-embed .ek-intro{min-height:auto;justify-content:flex-start;padding:20px 0;}
+.ek.is-embed .ek-intro{min-height:auto;justify-content:flex-start;padding:0;}
 
 /* ── HEADER ── */
 .ek-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--brd);gap:12px;}
@@ -1927,15 +1941,36 @@ function EnergiKalkylator() {
               )}
               
               {/* BOOSTERS */}
-              {cur.id === "boosters" && (
+              {cur.id === "boosters" && (() => {
+                // Beräkna distans i km — om "Annan distans" ej fyllts i ännu visas
+                // alla boosters (vi vet inte om det är 5K eller 100K än).
+                const km = ans.distance === -1 
+                  ? (parseFloat(ans.customDistance) || 0)
+                  : (ans.distance || 0);
+                
+                // Bedöm relevans:
+                // - Beetroot: bäst för 5K-maraton (kortare högintensiva lopp)
+                //   Marginell vinst på ultra eftersom intensiteten är lägre.
+                // - Bicarb: 30-60 min effekt → kort till medellång intensiv 
+                //   prestation. Inte vettigt på ultra (magrisk + effekten räcker
+                //   inte). Kräver också vana ("nyborjare" ska INTE ta bikarb).
+                // - Nomio: tas 2-3h före, mild effekt, generellt OK för alla lopp.
+                const beetrootSkip = km > 0 && km > 50;  // ultra > 50K
+                const bicarbSkip = (km > 0 && km > 50) || ans.experience === "nyborjare";
+                const bicarbSkipReason = ans.experience === "nyborjare"
+                  ? "Kräver vana, skip om magen inte är intränad"
+                  : "Effekten varar 30-60 min — för kort för ultralopp";
+                
+                return (
                 <>
                 <div className="ek-opts">
-                  <button className={`ek-opt multi ${ans.boosters.includes("beetroot") ? "sel" : ""}`}
-                          onClick={() => toggleBooster("beetroot")}>
+                  <button className={`ek-opt multi ${ans.boosters.includes("beetroot") ? "sel" : ""} ${beetrootSkip ? "ek-opt-dim" : ""}`}
+                          onClick={() => !beetrootSkip && toggleBooster("beetroot")}>
                     <span className="ek-opt-ico"><Icon name="beetroot"/></span>
                     <div className="ek-opt-txt">
                       <div className="ek-opt-lbl">Rödbetsshot</div>
                       <div className="ek-opt-dsc">Nitrat förbättrar löpekonomin med 1-3%. Bra för 5K upp till maraton. Vi väljer märke baserat på lager.</div>
+                      {beetrootSkip && <div className="ek-opt-warn"><Icon name="warning" size={13}/> Marginell effekt på ultra — intensiteten är för låg</div>}
                     </div>
                     <div className="ek-chk"><div className="ek-dot"/></div>
                   </button>
@@ -1948,13 +1983,13 @@ function EnergiKalkylator() {
                     </div>
                     <div className="ek-chk"><div className="ek-dot"/></div>
                   </button>
-                  <button className={`ek-opt multi ${ans.boosters.includes("bicarb") ? "sel" : ""} ${ans.experience === "nyborjare" ? "ek-opt-dim" : ""}`}
-                          onClick={() => ans.experience !== "nyborjare" && toggleBooster("bicarb")}>
+                  <button className={`ek-opt multi ${ans.boosters.includes("bicarb") ? "sel" : ""} ${bicarbSkip ? "ek-opt-dim" : ""}`}
+                          onClick={() => !bicarbSkip && toggleBooster("bicarb")}>
                     <span className="ek-opt-ico"><Icon name="erlenmeyer"/></span>
                     <div className="ek-opt-txt">
                       <div className="ek-opt-lbl">Bikarbonat</div>
                       <div className="ek-opt-dsc">Buffrar laktat. Bäst för korta-medellånga lopp och elitsatsningar.</div>
-                      {ans.experience === "nyborjare" && <div className="ek-opt-warn"><Icon name="warning" size={13}/> Kräver vana, skip om magen inte är intränad</div>}
+                      {bicarbSkip && <div className="ek-opt-warn"><Icon name="warning" size={13}/> {bicarbSkipReason}</div>}
                     </div>
                     <div className="ek-chk"><div className="ek-dot"/></div>
                   </button>
@@ -1963,7 +1998,8 @@ function EnergiKalkylator() {
                   Vill du köra utan boosters? Hoppa direkt till <strong style={{color:"var(--mut)"}}>Räkna ut planen</strong> nedan.
                 </p>
                 </>
-              )}
+                );
+              })()}
               
               <div className="ek-nav">
                 <button className="btn btn-back" onClick={goBack}>← Tillbaka</button>
@@ -1991,7 +2027,14 @@ function EnergiKalkylator() {
               <div className="ek-result-eye">Din personliga plan</div>
               <h1 className="ek-result-h">
                 {plan.distance} km på<br/>
-                <em>{Math.floor(plan.timeMin / 60)}h {Math.round(plan.timeMin % 60)}min</em>
+                <em>{(() => {
+                  const totalMin = Math.round(plan.timeMin);
+                  const h = Math.floor(totalMin / 60);
+                  const m = totalMin - h * 60;
+                  if (h === 0) return `${m} min`;
+                  if (m === 0) return `${h}h`;
+                  return `${h}h ${m}min`;
+                })()}</em>
               </h1>
               <p className="ek-result-sub">
                 För dig (<strong>{plan.weight} kg, {plan.sex}</strong>) i fart <strong>{Math.floor(plan.pace_min_per_km)}:{Math.round((plan.pace_min_per_km % 1) * 60).toString().padStart(2,"0")}/km</strong>. 
@@ -2041,7 +2084,7 @@ function EnergiKalkylator() {
                     <p className="ek-block-detail">{b.detail}</p>
                     {b.product && (
                       <div className="ek-prod-list">
-                        <ProductCard product={b.product} note={b.product.dose}/>
+                        <ProductCard product={b.product} amount={b.productAmount} note={b.product.dose}/>
                       </div>
                     )}
                   </div>
