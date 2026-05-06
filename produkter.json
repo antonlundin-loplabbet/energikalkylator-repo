@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-04 12:11:10Z",
+  "updated": "2026-05-06 11:44:04Z",
   "source": "https://services.intersport.se/api/noselake/searcher/website?q=&site=Loplabbet&hits=4000",
   "count": 109,
   "products": [
@@ -544,7 +544,7 @@
       "inStock": true
     },
     {
-      "id": "1624560",
+      "id": "1624561",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
       "type": "bicarb",
@@ -559,48 +559,8 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "https://www.loplabbet.se/products/1624560/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162456001000_10.jpg",
-      "inStock": true
-    },
-    {
-      "id": "1624558",
-      "brand": "Maurten",
-      "name": "Maurten Bicarb System",
-      "type": "bicarb",
-      "carbs": null,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "756",
-        "pricetype": "RegularPrice",
-        "regularprice": "756",
-        "salescontroltype": "Regular",
-        "sortprice": "756"
-      },
-      "url": "https://www.loplabbet.se/products/1624558/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455801000_10.jpg",
-      "inStock": true
-    },
-    {
-      "id": "1624559",
-      "brand": "Maurten",
-      "name": "Maurten Bicarb System",
-      "type": "bicarb",
-      "carbs": null,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "756",
-        "pricetype": "RegularPrice",
-        "regularprice": "756",
-        "salescontroltype": "Regular",
-        "sortprice": "756"
-      },
-      "url": "https://www.loplabbet.se/products/1624559/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
+      "url": "https://www.loplabbet.se/products/1624561/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162456101000_10.jpg",
       "inStock": true
     },
     {
@@ -624,7 +584,7 @@
       "inStock": true
     },
     {
-      "id": "1624561",
+      "id": "1624559",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
       "type": "bicarb",
@@ -639,8 +599,48 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "https://www.loplabbet.se/products/1624561/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162456101000_10.jpg",
+      "url": "https://www.loplabbet.se/products/1624559/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1624558",
+      "brand": "Maurten",
+      "name": "Maurten Bicarb System",
+      "type": "bicarb",
+      "carbs": null,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "756",
+        "pricetype": "RegularPrice",
+        "regularprice": "756",
+        "salescontroltype": "Regular",
+        "sortprice": "756"
+      },
+      "url": "https://www.loplabbet.se/products/1624558/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455801000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1624560",
+      "brand": "Maurten",
+      "name": "Maurten Bicarb System",
+      "type": "bicarb",
+      "carbs": null,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "756",
+        "pricetype": "RegularPrice",
+        "regularprice": "756",
+        "salescontroltype": "Regular",
+        "sortprice": "756"
+      },
+      "url": "https://www.loplabbet.se/products/1624560/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162456001000_10.jpg",
       "inStock": true
     },
     {
@@ -984,27 +984,6 @@
       "inStock": true
     },
     {
-      "id": "1611475",
-      "brand": "Spektrum",
-      "name": "Spektrum KESU SPORTGLASÖGON",
-      "type": "drink_mix",
-      "carbs": 40,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "50",
-        "price": "349.5",
-        "pricetype": "CampaignPrice",
-        "regularprice": "699",
-        "salescontroldescription": "SISTA CHANSEN",
-        "salescontroltype": "LastChance",
-        "sortprice": "349.5"
-      },
-      "url": "https://www.loplabbet.se/products/1611475/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/161147501000_10.jpg",
-      "inStock": true
-    },
-    {
       "id": "1611474",
       "brand": "Spektrum",
       "name": "Spektrum KESU SPORTGLASÖGON",
@@ -1023,6 +1002,27 @@
       },
       "url": "https://www.loplabbet.se/products/1611474/01",
       "img": "https://cdn.intersport.se/productimages/690x600/161147401000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1611475",
+      "brand": "Spektrum",
+      "name": "Spektrum KESU SPORTGLASÖGON",
+      "type": "drink_mix",
+      "carbs": 40,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "50",
+        "price": "349.5",
+        "pricetype": "CampaignPrice",
+        "regularprice": "699",
+        "salescontroldescription": "SISTA CHANSEN",
+        "salescontroltype": "LastChance",
+        "sortprice": "349.5"
+      },
+      "url": "https://www.loplabbet.se/products/1611475/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/161147501000_10.jpg",
       "inStock": true
     },
     {
