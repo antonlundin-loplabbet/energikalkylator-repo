@@ -580,7 +580,10 @@ function suggestProducts(plan, products) {
     });
   }
   // Pre-workout / koffein
-  if (time_h >= 0.5) {
+  // Tröskeln är distans-baserad, inte tid — koffein ger störst relativ effekt
+  // på korta högintemsiva lopp och en elitlöpare på 10 km kan springa under
+  // 30 min men behöver pre-race-boost lika mycket som alla andra.
+  if (plan.distance >= 5) {
     // Prioritetsordning för "sista pre-race-boost":
     //  1. Brand-preferens har specifik pre_drink (Enervit Pre Sport) → använd den
     //  2. Brand-preferens har koffein-gel → använd den (samma effekt + brand-konsistens)
