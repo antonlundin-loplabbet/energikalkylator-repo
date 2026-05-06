@@ -602,7 +602,7 @@ function suggestProducts(plan, products) {
     // för koffein är 3-6 mg/kg → en 70kg-löpare landar på 210-420 mg, vilket
     // motsvarar 2-4 vanliga gels (100mg/st). Dubbeldos är dock inget för
     // nya löpare och kan ge magbesvär — därför endast vid experience=elite.
-    const isElitePush = ans.experience === "elite" && time_h <= 2 && plan.distance <= 21.1;
+    const isElitePush = plan.experience === "avancerad" && time_h <= 2 && plan.distance <= 21.1;
 
     if (brandPreDrink) {
       preProduct = brandPreDrink;
