@@ -1959,10 +1959,10 @@ function EnergiKalkylator() {
                 //   inte). Kräver också vana ("nyborjare" ska INTE ta bikarb).
                 // - Nomio: tas 2-3h före, mild effekt, generellt OK för alla lopp.
                 const beetrootSkip = km > 0 && km > 50;  // ultra > 50K
-                const bicarbSkip = (km > 0 && km > 50) || ans.experience === "nyborjare";
+                const bicarbSkip = (km > 0 && km >= 42.195) || ans.experience === "nyborjare";
                 const bicarbSkipReason = ans.experience === "nyborjare"
                   ? "Kräver vana, skip om magen inte är intränad"
-                  : "Effekten varar 30-60 min — för kort för ultralopp";
+                  : "Effekten varar 30-60 min — inte tillräckligt för maraton och längre";
                 
                 return (
                 <>
