@@ -1,8 +1,28 @@
 {
-  "updated": "2026-05-06 11:44:04Z",
+  "updated": "2026-05-11 16:17:19Z",
   "source": "https://services.intersport.se/api/noselake/searcher/website?q=&site=Loplabbet&hits=4000",
-  "count": 109,
+  "count": 110,
   "products": [
+    {
+      "id": "1674698",
+      "brand": "adidas",
+      "name": "adidas ADIZERO RUNNING GEL POCKET LÖPARSHORTS",
+      "type": "gel",
+      "carbs": 25,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "749",
+        "pricetype": "RegularPrice",
+        "regularprice": "749",
+        "salescontroltype": "Regular",
+        "sortprice": "749"
+      },
+      "url": "https://www.loplabbet.se/products/1674698/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/167469801000_10.jpg",
+      "inStock": true
+    },
     {
       "id": "1541083",
       "brand": "Enervit",
@@ -53,11 +73,11 @@
       "dose": "",
       "price": {
         "percentvalue": "0",
-        "price": "27",
+        "price": "36",
         "pricetype": "RegularPrice",
-        "regularprice": "27",
+        "regularprice": "36",
         "salescontroltype": "Regular",
-        "sortprice": "27"
+        "sortprice": "36"
       },
       "url": "https://www.loplabbet.se/products/1564857/01",
       "img": "https://cdn.intersport.se/productimages/690x600/156485701000_10.jpg",
@@ -544,7 +564,7 @@
       "inStock": true
     },
     {
-      "id": "1624561",
+      "id": "1624559",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
       "type": "bicarb",
@@ -559,8 +579,28 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "https://www.loplabbet.se/products/1624561/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162456101000_10.jpg",
+      "url": "https://www.loplabbet.se/products/1624559/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1624560",
+      "brand": "Maurten",
+      "name": "Maurten Bicarb System",
+      "type": "bicarb",
+      "carbs": null,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "756",
+        "pricetype": "RegularPrice",
+        "regularprice": "756",
+        "salescontroltype": "Regular",
+        "sortprice": "756"
+      },
+      "url": "https://www.loplabbet.se/products/1624560/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162456001000_10.jpg",
       "inStock": true
     },
     {
@@ -584,7 +624,7 @@
       "inStock": true
     },
     {
-      "id": "1624559",
+      "id": "1624561",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
       "type": "bicarb",
@@ -599,8 +639,8 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "https://www.loplabbet.se/products/1624559/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
+      "url": "https://www.loplabbet.se/products/1624561/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162456101000_10.jpg",
       "inStock": true
     },
     {
@@ -621,26 +661,6 @@
       },
       "url": "https://www.loplabbet.se/products/1624558/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162455801000_10.jpg",
-      "inStock": true
-    },
-    {
-      "id": "1624560",
-      "brand": "Maurten",
-      "name": "Maurten Bicarb System",
-      "type": "bicarb",
-      "carbs": null,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "756",
-        "pricetype": "RegularPrice",
-        "regularprice": "756",
-        "salescontroltype": "Regular",
-        "sortprice": "756"
-      },
-      "url": "https://www.loplabbet.se/products/1624560/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162456001000_10.jpg",
       "inStock": true
     },
     {
@@ -1206,26 +1226,6 @@
       "inStock": true
     },
     {
-      "id": "1667245",
-      "brand": "Umara",
-      "name": "Umara U RECOVER PROTEINBAR",
-      "type": "bar",
-      "carbs": 30,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "29",
-        "pricetype": "RegularPrice",
-        "regularprice": "29",
-        "salescontroltype": "Regular",
-        "sortprice": "29"
-      },
-      "url": "https://www.loplabbet.se/products/1667245/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/166724501000_10.jpg",
-      "inStock": true
-    },
-    {
       "id": "1650433",
       "brand": "Umara",
       "name": "Umara U RECOVER PROTEINBAR",
@@ -1243,6 +1243,26 @@
       },
       "url": "https://www.loplabbet.se/products/1650433/01",
       "img": "https://cdn.intersport.se/productimages/690x600/165043301000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1667245",
+      "brand": "Umara",
+      "name": "Umara U RECOVER PROTEINBAR",
+      "type": "bar",
+      "carbs": 30,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "29",
+        "pricetype": "RegularPrice",
+        "regularprice": "29",
+        "salescontroltype": "Regular",
+        "sortprice": "29"
+      },
+      "url": "https://www.loplabbet.se/products/1667245/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/166724501000_10.jpg",
       "inStock": true
     },
     {
