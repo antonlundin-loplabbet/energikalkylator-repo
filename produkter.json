@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-11 16:17:19Z",
+  "updated": "2026-05-18 16:43:06Z",
   "source": "https://services.intersport.se/api/noselake/searcher/website?q=&site=Loplabbet&hits=4000",
   "count": 110,
   "products": [
@@ -564,7 +564,7 @@
       "inStock": true
     },
     {
-      "id": "1624559",
+      "id": "1624558",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
       "type": "bicarb",
@@ -579,8 +579,8 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "https://www.loplabbet.se/products/1624559/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
+      "url": "https://www.loplabbet.se/products/1624558/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455801000_10.jpg",
       "inStock": true
     },
     {
@@ -604,26 +604,6 @@
       "inStock": true
     },
     {
-      "id": "1624557",
-      "brand": "Maurten",
-      "name": "Maurten Bicarb System",
-      "type": "bicarb",
-      "carbs": null,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "756",
-        "pricetype": "RegularPrice",
-        "regularprice": "756",
-        "salescontroltype": "Regular",
-        "sortprice": "756"
-      },
-      "url": "https://www.loplabbet.se/products/1624557/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455701000_10.jpg",
-      "inStock": true
-    },
-    {
       "id": "1624561",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
@@ -644,7 +624,7 @@
       "inStock": true
     },
     {
-      "id": "1624558",
+      "id": "1624557",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
       "type": "bicarb",
@@ -659,8 +639,28 @@
         "salescontroltype": "Regular",
         "sortprice": "756"
       },
-      "url": "https://www.loplabbet.se/products/1624558/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455801000_10.jpg",
+      "url": "https://www.loplabbet.se/products/1624557/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455701000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1624559",
+      "brand": "Maurten",
+      "name": "Maurten Bicarb System",
+      "type": "bicarb",
+      "carbs": null,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "756",
+        "pricetype": "RegularPrice",
+        "regularprice": "756",
+        "salescontroltype": "Regular",
+        "sortprice": "756"
+      },
+      "url": "https://www.loplabbet.se/products/1624559/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
       "inStock": true
     },
     {
@@ -2126,26 +2126,6 @@
       "inStock": true
     },
     {
-      "id": "1608276",
-      "brand": "Umara",
-      "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
-      "type": "recovery",
-      "carbs": 30,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "369",
-        "pricetype": "RegularPrice",
-        "regularprice": "369",
-        "salescontroltype": "Regular",
-        "sortprice": "369"
-      },
-      "url": "https://www.loplabbet.se/products/1608276/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/160827601000_10.jpg",
-      "inStock": true
-    },
-    {
       "id": "1593551",
       "brand": "Umara",
       "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
@@ -2163,6 +2143,26 @@
       },
       "url": "https://www.loplabbet.se/products/1593551/01",
       "img": "https://cdn.intersport.se/productimages/690x600/159355101000_10.jpg",
+      "inStock": true
+    },
+    {
+      "id": "1608276",
+      "brand": "Umara",
+      "name": "Umara U RECOVER 1 KG ÅTERHÄMTNINGSDRYCK",
+      "type": "recovery",
+      "carbs": 30,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "369",
+        "pricetype": "RegularPrice",
+        "regularprice": "369",
+        "salescontroltype": "Regular",
+        "sortprice": "369"
+      },
+      "url": "https://www.loplabbet.se/products/1608276/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/160827601000_10.jpg",
       "inStock": true
     },
     {
