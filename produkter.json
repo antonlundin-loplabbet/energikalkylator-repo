@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-21 07:15:31Z",
+  "updated": "2026-05-25 16:06:35Z",
   "source": "https://services.intersport.se/api/noselake/searcher/website?q=&site=Loplabbet&hits=4000",
   "count": 111,
   "products": [
@@ -584,6 +584,26 @@
       "inStock": true
     },
     {
+      "id": "1624557",
+      "brand": "Maurten",
+      "name": "Maurten Bicarb System",
+      "type": "bicarb",
+      "carbs": null,
+      "caf": null,
+      "dose": "",
+      "price": {
+        "percentvalue": "0",
+        "price": "756",
+        "pricetype": "RegularPrice",
+        "regularprice": "756",
+        "salescontroltype": "Regular",
+        "sortprice": "756"
+      },
+      "url": "https://www.loplabbet.se/products/1624557/01",
+      "img": "https://cdn.intersport.se/productimages/690x600/162455701000_10.jpg",
+      "inStock": true
+    },
+    {
       "id": "1624561",
       "brand": "Maurten",
       "name": "Maurten Bicarb System",
@@ -621,26 +641,6 @@
       },
       "url": "https://www.loplabbet.se/products/1624559/01",
       "img": "https://cdn.intersport.se/productimages/690x600/162455901000_10.jpg",
-      "inStock": true
-    },
-    {
-      "id": "1624557",
-      "brand": "Maurten",
-      "name": "Maurten Bicarb System",
-      "type": "bicarb",
-      "carbs": null,
-      "caf": null,
-      "dose": "",
-      "price": {
-        "percentvalue": "0",
-        "price": "756",
-        "pricetype": "RegularPrice",
-        "regularprice": "756",
-        "salescontroltype": "Regular",
-        "sortprice": "756"
-      },
-      "url": "https://www.loplabbet.se/products/1624557/01",
-      "img": "https://cdn.intersport.se/productimages/690x600/162455701000_10.jpg",
       "inStock": true
     },
     {
